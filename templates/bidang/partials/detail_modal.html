@@ -1,0 +1,53 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="text-[16px] font-bold text-ink">Detail Arsip</h2>
+    <button onclick="closeModalForce()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
+      <svg class="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  {% if row %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+    {% set fields = [
+      ("Nomor Urut", row.nomor, True),
+      ("No Surat", row.no_surat, True),
+      ("Uraian Arsip", row.uraian_arsip, False),
+      ("Pengirim", row.pengirim, False),
+      ("Tanggal Surat", row.tanggal_surat, True),
+      ("Tahun", row.tahun, True),
+      ("Sub Kegiatan", row.sub_kegiatan, False),
+      ("Kode Klas", row.kode_klas, True),
+      ("Retensi Aktif", row.retensi_aktif, False),
+      ("Retensi Inaktif", row.retensi_inaktif, False),
+      ("Keterangan", row.keterangan_jra, False),
+      ("SKKD", row.skkd, False),
+      ("Klasifikasi Akses", row.klasifikasi_akses, False),
+      ("Unit Pengolah", row.unit_pengolah, False),
+      ("TK Perkembangan", row.tk_perkembangan, True),
+      ("Kondisi Arsip", row.kondisi_arsip, False),
+      ("Jumlah", row.jumlah, True),
+      ("Kategori Arsip", row.kategori_arsip, False),
+    ] %}
+    {% for label, val, is_mono in fields %}
+    <div class="bg-surface rounded-lg px-4 py-3">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-wide mb-1">{{ label }}</p>
+      <p class="text-[13px] {% if is_mono %}font-mono{% endif %} text-ink font-medium">{{ val or '—' }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="flex gap-3 pt-4 border-t border-border">
+    <button onclick="loadEdit({{ baris }}); closeModalForce();"
+      class="flex-1 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+      Edit Data
+    </button>
+    <button onclick="closeModalForce()"
+      class="flex-1 border border-border hover:border-primary/30 text-ink text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+      Tutup
+    </button>
+  </div>
+
+  {% else %}
+  <p class="text-muted text-[13px]">Data tidak ditemukan.</p>
+  {% endif %}
+</div>

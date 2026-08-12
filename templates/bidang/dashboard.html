@@ -1,0 +1,76 @@
+{% extends "bidang/base_bidang.html" %}
+{% block title %}Dashboard — {{ bidang.nama_pendek }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-7">
+    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">{{ bidang.nama }}</p>
+    <h1 class="text-[24px] sm:text-[28px] font-extrabold text-ink leading-tight">Selamat datang, {{ user.nama.split()[0] }}</h1>
+    <p class="text-muted text-[13px] mt-1">Sistem Pengarsipan Digital ARDIVA · DPMPD Kalimantan Timur</p>
+  </div>
+
+  <!-- Status + CTA -->
+  <div class="card p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+    <div class="flex items-center gap-3 flex-1 min-w-0">
+      <div class="w-2.5 h-2.5 rounded-full shrink-0 {% if status.status == 'success' %}bg-emerald-500{% else %}bg-red-500{% endif %}"></div>
+      <div class="min-w-0">
+        <p class="text-[14px] font-semibold text-ink">
+          {% if status.status == "success" %}Terhubung ke Google Sheets{% else %}Google Sheets belum terhubung{% endif %}
+        </p>
+        <p class="text-[12px] text-muted truncate">
+          {% if status.status == "success" %}{{ status.jumlah_data or 0 }} data tersimpan di spreadsheet bidang ini{% else %}{{ status.message }}{% endif %}
+        </p>
+      </div>
+    </div>
+    <a href="/b/{{ bidang_id }}/input"
+      class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-colors shrink-0">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Input Surat Baru
+    </a>
+  </div>
+
+  <!-- Info cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="card p-5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Alur Kerja</p>
+      <ol class="space-y-2 text-[13px] text-ink">
+        <li class="flex items-start gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+          Upload PDF surat
+        </li>
+        <li class="flex items-start gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+          AI baca data otomatis
+        </li>
+        <li class="flex items-start gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+          Verifikasi dan simpan
+        </li>
+      </ol>
+    </div>
+    <div class="card p-5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Otomatis Terisi</p>
+      <ul class="space-y-1.5 text-[13px] text-ink">
+        {% for item in ["Nomor & tanggal surat","Pengirim surat","Kode klasifikasi","Retensi JRA & SKKD"] %}
+        <li class="flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          {{ item }}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card p-5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Dasar Hukum</p>
+      <p class="text-[13px] text-ink leading-relaxed">Peraturan Gubernur Kalimantan Timur <span class="font-semibold">No. 9 Tahun 2024</span> tentang Instrumen Pengelolaan Arsip Dinamis.</p>
+      <p class="text-[12px] text-muted mt-2">Database mencakup <span class="font-semibold text-ink">3.151 kode klas</span> beserta JRA dan SKKD.</p>
+    </div>
+  </div>
+
+  <div class="flex justify-end mt-5">
+    <a href="/b/{{ bidang_id }}/data" class="text-[13px] text-primary font-medium hover:underline">
+      Lihat semua data arsip →
+    </a>
+  </div>
+</div>
+{% endblock %}

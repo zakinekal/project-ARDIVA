@@ -1,0 +1,27 @@
+{% if hasil.status == "success" %}
+<div class="flex items-center gap-2 text-primary text-[13px] font-semibold">
+  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+  Tersimpan sebagai nomor {{ hasil.nomor }} (baris ke-{{ hasil.nomor_baris }})
+</div>
+
+{% elif hasil.status == "duplikat" %}
+<div class="bg-amber-50 border border-amber-200 text-amber-800 text-[13px] px-4 py-3 rounded-xl w-full">
+  <p class="font-medium mb-3">{{ hasil.message }}</p>
+  <form hx-post="/b/{{ bidang_id }}/input/simpan" hx-target="#simpan-hasil" hx-swap="innerHTML">
+    {% for k, v in row.items() %}
+    <input type="hidden" name="{{ k }}" value="{{ v }}">
+    {% endfor %}
+    <input type="hidden" name="force" value="true">
+    <button type="submit"
+      class="text-[12px] font-semibold bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg transition-colors">
+      Ya, tetap simpan sebagai entri baru
+    </button>
+  </form>
+</div>
+
+{% else %}
+<div class="flex items-center gap-2 text-red-700 text-[13px] font-medium">
+  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  Gagal menyimpan: {{ hasil.message }}
+</div>
+{% endif %}

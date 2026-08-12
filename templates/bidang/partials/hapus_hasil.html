@@ -1,0 +1,15 @@
+{% if hasil.status == "success" %}
+<div class="flex items-center gap-2 text-primary text-[13px] font-semibold mb-4">
+  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+  Data berhasil dihapus.
+</div>
+<button onclick="closeModalForce(); window.location.reload();"
+  class="w-full bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+  Kembali ke Data Arsip
+</button>
+{% else %}
+<div class="flex items-center gap-2 text-red-700 text-[13px] font-medium mb-4">
+  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  Gagal menghapus: {{ hasil.message }}
+</div>
+{% endif %}

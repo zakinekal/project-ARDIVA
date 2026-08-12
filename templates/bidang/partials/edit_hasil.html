@@ -1,0 +1,12 @@
+{% if hasil.status == "success" %}
+<div class="flex items-center gap-2 text-primary text-[13px] font-semibold mt-3">
+  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+  Data berhasil diperbarui.
+  <button onclick="closeModalForce(); window.location.reload();" class="ml-2 text-[12px] underline text-muted">Refresh halaman</button>
+</div>
+{% else %}
+<div class="flex items-center gap-2 text-red-700 text-[13px] font-medium mt-3">
+  <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  Gagal: {{ hasil.message }}
+</div>
+{% endif %}

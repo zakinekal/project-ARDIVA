@@ -1,0 +1,64 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="text-[16px] font-bold text-ink">Edit Data Arsip</h2>
+    <button onclick="closeModalForce()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors">
+      <svg class="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  {% if row %}
+  <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/edit" hx-target="#edit-hasil" hx-swap="innerHTML" class="space-y-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="fl"><label>No Surat</label><input type="text" name="no_surat" value="{{ row.no_surat }}" class="mono"></div>
+      <div class="fl"><label>Uraian Arsip / Perihal</label><input type="text" name="uraian_arsip" value="{{ row.uraian_arsip }}"></div>
+      <div class="fl"><label>Tanggal Surat</label><input type="text" name="tanggal_surat" value="{{ row.tanggal_surat }}" class="mono"></div>
+      <div class="fl"><label>Tahun</label><input type="text" name="tahun" value="{{ row.tahun }}" class="mono"></div>
+      <div class="fl"><label>Pengirim</label><input type="text" name="pengirim" value="{{ row.pengirim }}"></div>
+      <div class="fl"><label>Jumlah</label><input type="text" name="jumlah" value="{{ row.jumlah }}" class="mono"></div>
+      <div class="fl">
+        <label>Sub Kegiatan</label>
+        <select name="sub_kegiatan">
+          {% for s in sub_list %}
+          <option value="{{ s }}" {% if s == row.sub_kegiatan %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="fl"><label>Kode Klas</label><input type="text" name="kode_klas" value="{{ row.kode_klas }}" class="mono"></div>
+      <div class="fl"><label>Retensi Aktif</label><input type="text" name="retensi_aktif" value="{{ row.retensi_aktif }}"></div>
+      <div class="fl"><label>Retensi Inaktif</label><input type="text" name="retensi_inaktif" value="{{ row.retensi_inaktif }}"></div>
+      <div class="fl"><label>Keterangan</label><input type="text" name="keterangan_jra" value="{{ row.keterangan_jra }}"></div>
+      <div class="fl"><label>SKKD</label><input type="text" name="skkd" value="{{ row.skkd }}"></div>
+      <div class="fl">
+        <label>TK Perkembangan</label>
+        <select name="tk_perkembangan">
+          <option value="COPY" {% if row.tk_perkembangan == 'COPY' %}selected{% endif %}>COPY</option>
+          <option value="ASLI" {% if row.tk_perkembangan == 'ASLI' %}selected{% endif %}>ASLI</option>
+        </select>
+      </div>
+      <div class="fl">
+        <label>Kondisi Arsip</label>
+        <select name="kondisi_arsip">
+          {% for k in ['BAIK','RUSAK RINGAN','RUSAK BERAT'] %}
+          <option value="{{ k }}" {% if k == row.kondisi_arsip %}selected{% endif %}>{{ k }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div id="edit-hasil"></div>
+
+    <div class="flex gap-3 pt-3 border-t border-border">
+      <button type="submit"
+        class="flex-1 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+        Simpan Perubahan
+      </button>
+      <button type="button" onclick="closeModalForce()"
+        class="flex-1 border border-border text-ink text-[13px] font-semibold py-2.5 rounded-lg hover:border-primary/30 transition-colors">
+        Batal
+      </button>
+    </div>
+  </form>
+  {% else %}
+  <p class="text-muted text-[13px]">Data tidak ditemukan.</p>
+  {% endif %}
+</div>

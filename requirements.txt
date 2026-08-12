@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+pdfplumber
+scikit-learn
+openpyxl
+requests
+authlib
+httpx
+itsdangerous
+python-dotenv

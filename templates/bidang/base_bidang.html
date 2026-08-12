@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}ARDIVA{% endblock %}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      primary: { DEFAULT:'#0D6B52', light:'#12855F', dark:'#0A5241', faint:'#E8F5F0' },
+      gold: { DEFAULT:'#C9973A', light:'#F0D08A' },
+      ink: '#0F1E2D', muted: '#5A6A7A',
+      surface: '#F5F7FA', border: '#E4E9F0',
+    },
+    fontFamily: {
+      sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+      mono: ['"IBM Plex Mono"', 'monospace'],
+    }
+  }}
+}
+</script>
+<style>
+  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background:#F5F7FA; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* Sidebar */
+  .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
+  @media(max-width:767px) {
+    .sidebar { position:fixed; top:0; left:0; height:100vh; z-index:50; transform:translateX(-100%); }
+    .sidebar.open { transform:translateX(0); }
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; }
+    .overlay.open { display:block; }
+  }
+
+  /* Nav link */
+  .nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; font-size:13px; color:rgba(255,255,255,.5); transition:all .15s; border-left:2px solid transparent; }
+  .nav-link:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.85); }
+  .nav-link.on { background:rgba(13,107,82,.2); color:#4ADE80; border-left-color:#0D6B52; }
+  .nav-link.on svg { color:#4ADE80; }
+
+  /* htmx spinner */
+  .htmx-indicator { opacity:0; transition:opacity .15s; }
+  .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity:1; }
+
+  /* Card */
+  .card { background:white; border:1px solid #E4E9F0; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+
+  /* Field */
+  .fl label { display:block; font-size:11px; font-weight:600; color:#5A6A7A; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+  .fl input, .fl select, .fl textarea {
+    width:100%; padding:9px 11px; border:1.5px solid #E4E9F0; border-radius:8px;
+    font-size:13px; color:#0F1E2D; background:white; font-family:inherit; transition:border .15s;
+  }
+  .fl input:focus, .fl select:focus { outline:none; border-color:#0D6B52; box-shadow:0 0 0 3px rgba(13,107,82,.1); }
+  .fl input.ai { background:#F0FDF4; border-color:#86EFAC; color:#065F46; font-family:'IBM Plex Mono',monospace; }
+  .fl label .ab { display:inline-block; font-size:9px; background:#0D6B52; color:white; border-radius:3px; padding:1px 4px; margin-left:4px; font-weight:700; vertical-align:middle; }
+
+  /* Badges */
+  .b-ok   { background:#ECFDF5; color:#065F46; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+  .b-bad  { background:#FEF2F2; color:#991B1B; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+  .b-warn { background:#FFFBEB; color:#92400E; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
+
+  /* Modal backdrop */
+  #modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:60; align-items:center; justify-content:center; padding:16px; }
+  #modal-backdrop.open { display:flex; }
+  #modal-content { background:white; border-radius:16px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,.2); }
+
+  *:focus-visible { outline:2px solid #0D6B52; outline-offset:2px; }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body class="antialiased text-ink">
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="flex min-h-screen">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar w-60 bg-[#0A1628] flex flex-col shrink-0">
+
+    <!-- Header -->
+    <div class="px-4 py-4 border-b border-white/8">
+      <div class="flex items-center gap-2.5 mb-3">
+        <div class="w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
+            <path d="M10 12h4"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold text-[13px] text-white leading-tight">ARDIVA</p>
+          <p class="text-[10px] text-slate-500 mono">DPMPD Kaltim</p>
+        </div>
+      </div>
+      <!-- Bidang label -->
+      <div class="bg-white/5 border border-white/8 rounded-lg px-3 py-2">
+        <p class="text-[9px] text-slate-500 uppercase font-semibold tracking-widest mb-0.5">Bidang Aktif</p>
+        <p class="text-[11px] text-slate-200 font-semibold leading-tight">{{ bidang.nama_pendek }}</p>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-3 space-y-0.5">
+      <a href="/b/{{ bidang_id }}/dashboard" class="nav-link {% if active_page=='dashboard' %}on{% endif %}">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/>
+          <rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="/b/{{ bidang_id }}/input" class="nav-link {% if active_page=='input' %}on{% endif %}">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Input Surat
+      </a>
+      <a href="/b/{{ bidang_id }}/data" class="nav-link {% if active_page=='data' %}on{% endif %}">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+        Lihat Data
+      </a>
+    </nav>
+
+    <!-- User info + logout -->
+    <div class="px-3 py-3 border-t border-white/8">
+      <div class="flex items-center gap-2.5 mb-2.5">
+        {% if user.foto %}
+        <img src="{{ user.foto }}" class="w-7 h-7 rounded-full shrink-0" alt="">
+        {% else %}
+        <div class="w-7 h-7 rounded-full bg-primary/30 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 text-green-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+        </div>
+        {% endif %}
+        <div class="min-w-0">
+          <p class="text-[12px] text-slate-200 font-medium truncate">{{ user.nama }}</p>
+          <p class="text-[10px] text-slate-500 truncate">{{ user.email }}</p>
+        </div>
+      </div>
+      <a href="/logout" class="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-colors">
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Keluar
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Mobile topbar -->
+    <header class="md:hidden flex items-center gap-3 px-4 py-3 bg-[#0A1628] border-b border-white/10 sticky top-0 z-30">
+      <button onclick="openSidebar()" class="text-slate-300 hover:text-white p-1">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+      </button>
+      <span class="text-[13px] font-bold text-white">ARDIVA</span>
+      <span class="text-[11px] text-slate-400 truncate">— {{ bidang.nama_pendek }}</span>
+    </header>
+
+    <main class="flex-1">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+
+<!-- Modal backdrop -->
+<div id="modal-backdrop" onclick="closeModal(event)">
+  <div id="modal-content"></div>
+</div>
+
+<script>
+function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal-backdrop').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(e)  { if(e.target===document.getElementById('modal-backdrop')){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; } }
+function closeModalForce(){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; }
+
+// htmx modal target helper
+document.addEventListener('htmx:afterSwap', function(e) {
+  if(e.detail.target.id==='modal-inner'){
+    openModal(document.getElementById('modal-inner').innerHTML);
+  }
+});
+</script>
+
+</body>
+</html>

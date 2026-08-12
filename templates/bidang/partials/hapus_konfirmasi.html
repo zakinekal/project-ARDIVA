@@ -1,0 +1,32 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="text-[16px] font-bold text-red-700">Konfirmasi Hapus</h2>
+    <button onclick="closeModalForce()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center">
+      <svg class="w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="bg-red-50 border border-red-100 rounded-xl p-4 mb-5">
+    <p class="text-[13px] text-red-800 font-medium mb-1">Data berikut akan dihapus permanen:</p>
+    {% if row %}
+    <p class="mono text-[12px] text-red-700">{{ row.no_surat }}</p>
+    <p class="text-[12px] text-red-600">{{ row.uraian_arsip }}</p>
+    {% endif %}
+    <p class="text-[11px] text-red-500 mt-2">Tindakan ini tidak dapat dibatalkan.</p>
+  </div>
+
+  <div id="hapus-hasil"></div>
+
+  <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/hapus" hx-target="#hapus-hasil" hx-swap="innerHTML">
+    <div class="flex gap-3">
+      <button type="submit"
+        class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+        Ya, hapus data ini
+      </button>
+      <button type="button" onclick="closeModalForce()"
+        class="flex-1 border border-border text-ink text-[13px] font-semibold py-2.5 rounded-lg hover:border-red-200 transition-colors">
+        Batal
+      </button>
+    </div>
+  </form>
+</div>

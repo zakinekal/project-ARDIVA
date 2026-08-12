@@ -1,0 +1,79 @@
+<div class="card p-5">
+  <div class="flex items-center gap-2 mb-1">
+    <span class="w-6 h-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0">2</span>
+    <h2 class="text-[14px] font-bold text-ink">Kode Klasifikasi, Retensi & SKKD</h2>
+  </div>
+  <p class="text-[11px] text-muted mb-4 ml-8">Pilih kode yang paling sesuai — kolom di bawah terisi otomatis.</p>
+
+  <div class="ml-8 space-y-2 mb-5">
+    {% for k in kandidat_kode %}
+    <label class="flex items-start gap-3 border border-border rounded-xl px-4 py-3 cursor-pointer hover:border-primary/40 has-[:checked]:border-primary has-[:checked]:bg-primary/3 transition-all">
+      <input type="radio" name="_kode_pilihan" {% if loop.first %}checked{% endif %}
+        class="mt-0.5 accent-primary shrink-0"
+        onchange="isiKode(this)"
+        data-kode="{{ k.kode_klasifikasi }}"
+        data-aktif="{{ k.retensi_aktif }}"
+        data-inaktif="{{ k.retensi_inaktif }}"
+        data-ket="{{ k.keterangan }}"
+        data-keamanan="{{ k.klasifikasi_keamanan }}"
+        data-akses="{{ k.klasifikasi_akses }}"
+        data-unit="{{ k.unit_pengolah }}">
+      <div class="text-[13px] min-w-0">
+        <span class="mono font-semibold text-ink">{{ k.kode_klasifikasi }}</span>
+        <span class="text-muted"> — {{ k.jenis_series_arsip[:80] }}</span>
+        <span class="block text-[10px] text-muted/70 mt-0.5">skor {{ k.skor }} · {{ k.sumber }}</span>
+      </div>
+    </label>
+    {% endfor %}
+  </div>
+
+  <div class="ml-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="fl">
+      <label>Kode Klas (final) <span class="ab">AUTO</span></label>
+      <input type="text" name="kode_kelas" id="f_kode" value="{{ kandidat_kode[0].kode_klasifikasi if kandidat_kode else '' }}" class="mono ai">
+      <input type="hidden" name="kode_klas" value="{{ kandidat_kode[0].kode_klasifikasi if kandidat_kode else '' }}">
+    </div>
+    <div class="fl">
+      <label>Retensi Aktif <span class="ab">PERGUB</span></label>
+      <input type="text" name="retensi_aktif" id="f_aktif" value="{{ kandidat_kode[0].retensi_aktif if kandidat_kode else '' }}" class="ai">
+    </div>
+    <div class="fl">
+      <label>Retensi Inaktif <span class="ab">PERGUB</span></label>
+      <input type="text" name="retensi_inaktif" id="f_inaktif" value="{{ kandidat_kode[0].retensi_inaktif if kandidat_kode else '' }}" class="ai">
+    </div>
+    <div class="fl">
+      <label>Keterangan <span class="ab">PERGUB</span></label>
+      <input type="text" name="keterangan" id="f_ket" value="{{ kandidat_kode[0].keterangan if kandidat_kode else '' }}" class="ai">
+      <input type="hidden" name="keterangan_jra" value="{{ kandidat_kode[0].keterangan if kandidat_kode else '' }}">
+    </div>
+    <div class="fl">
+      <label>SKKD <span class="ab">PERGUB</span></label>
+      <input type="text" name="skkd" id="f_keamanan" value="{{ kandidat_kode[0].klasifikasi_keamanan if kandidat_kode else '' }}" class="ai">
+    </div>
+    <div class="fl">
+      <label>Klasifikasi Akses <span class="ab">PERGUB</span></label>
+      <input type="text" name="klasifikasi_akses" id="f_akses" value="{{ kandidat_kode[0].klasifikasi_akses if kandidat_kode else '' }}" class="ai">
+    </div>
+    <div class="fl sm:col-span-2">
+      <label>Unit Pengolah</label>
+      <input type="text" name="unit_pengolah" id="f_unit" value="{{ kandidat_kode[0].unit_pengolah if kandidat_kode else '' }}">
+    </div>
+  </div>
+</div>
+
+<script>
+function isiKode(r) {
+  const ket = r.dataset.ket || '';
+  document.getElementById('f_kode').value    = r.dataset.kode;
+  document.getElementById('f_aktif').value   = r.dataset.aktif;
+  document.getElementById('f_inaktif').value = r.dataset.inaktif;
+  document.getElementById('f_ket').value     = ket;
+  document.getElementById('f_keamanan').value = r.dataset.keamanan;
+  document.getElementById('f_akses').value   = r.dataset.akses;
+  document.getElementById('f_unit').value    = r.dataset.unit;
+  const hKode = document.querySelector('[name="kode_klas"]');
+  if (hKode) hKode.value = r.dataset.kode;
+  const hKet = document.querySelector('[name="keterangan_jra"]');
+  if (hKet) hKet.value = ket;
+}
+</script>

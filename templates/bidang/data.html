@@ -1,0 +1,141 @@
+{% extends "bidang/base_bidang.html" %}
+{% block title %}Data Arsip — {{ bidang.nama_pendek }}{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-8 py-8">
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div>
+      <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">Rekap Arsip</p>
+      <h1 class="text-[22px] sm:text-[26px] font-extrabold text-ink">Data Arsip</h1>
+      <p class="text-muted text-[13px] mt-1">{{ total }} entri ditemukan</p>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="card p-4 mb-5">
+    <form method="get" action="/b/{{ bidang_id }}/data" class="flex flex-wrap gap-3 items-end">
+      <div class="flex-1 min-w-[180px]">
+        <label class="block text-[10px] font-semibold text-muted uppercase tracking-wide mb-1.5">Cari</label>
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" name="q" value="{{ q }}" placeholder="No surat, perihal, pengirim..."
+            class="w-full pl-8 pr-3 py-2 text-[13px] border border-border rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
+        </div>
+      </div>
+      <div class="w-44">
+        <label class="block text-[10px] font-semibold text-muted uppercase tracking-wide mb-1.5">Sub Kegiatan</label>
+        <select name="sub" class="w-full py-2 px-3 text-[13px] border border-border rounded-lg focus:outline-none focus:border-primary">
+          <option value="">Semua</option>
+          {% for s in sub_list %}<option value="{{ s }}" {% if s==sub %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="w-28">
+        <label class="block text-[10px] font-semibold text-muted uppercase tracking-wide mb-1.5">Tahun</label>
+        <select name="tahun" class="w-full py-2 px-3 text-[13px] border border-border rounded-lg focus:outline-none focus:border-primary">
+          <option value="">Semua</option>
+          {% for t in tahun_list %}<option value="{{ t }}" {% if t==tahun %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="bg-primary hover:bg-primary-dark text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition-colors">Filter</button>
+      {% if q or sub or tahun %}
+      <a href="/b/{{ bidang_id }}/data" class="text-[12px] text-muted hover:text-ink transition-colors py-2">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="block sm:hidden space-y-3 mb-5">
+    {% for r in rows %}
+    <div class="card p-4">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <span class="mono text-[12px] font-semibold text-ink truncate">{{ r.no_surat }}</span>
+        <span class="b-ok shrink-0">{{ r.kondisi_arsip or 'BAIK' }}</span>
+      </div>
+      <p class="text-[13px] text-ink font-medium mb-1 line-clamp-2">{{ r.uraian_arsip }}</p>
+      <p class="text-[12px] text-muted mb-2">{{ r.pengirim }}</p>
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[11px] text-muted truncate">{{ r.sub_kegiatan }}</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="loadDetail({{ r._baris }})"
+            class="text-[11px] text-primary font-semibold hover:underline">Detail</button>
+          <button onclick="loadHapus({{ r._baris }})"
+            class="text-[11px] text-red-500 font-semibold hover:underline">Hapus</button>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="card p-10 text-center text-muted text-[13px]">Belum ada data arsip.</div>
+    {% endfor %}
+  </div>
+
+  <!-- Desktop table -->
+  <div class="hidden sm:block card overflow-hidden mb-5">
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-[12px]">
+        <thead class="bg-surface border-b border-border">
+          <tr>
+            {% for col in ["No","No Surat","Uraian Arsip","Sub Kegiatan","Tgl Surat","Pengirim","Kondisi","Aksi"] %}
+            <th class="px-4 py-3 text-left text-[10px] font-semibold text-muted uppercase tracking-wide whitespace-nowrap">{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          {% for r in rows %}
+          <tr class="hover:bg-surface transition-colors">
+            <td class="px-4 py-3 text-muted mono">{{ r.nomor }}</td>
+            <td class="px-4 py-3 mono font-semibold text-ink max-w-[160px] truncate" title="{{ r.no_surat }}">{{ r.no_surat }}</td>
+            <td class="px-4 py-3 text-ink max-w-[200px] truncate" title="{{ r.uraian_arsip }}">{{ r.uraian_arsip }}</td>
+            <td class="px-4 py-3 text-muted max-w-[160px] truncate">{{ r.sub_kegiatan }}</td>
+            <td class="px-4 py-3 mono text-muted whitespace-nowrap">{{ r.tanggal_surat }}</td>
+            <td class="px-4 py-3 text-muted max-w-[140px] truncate">{{ r.pengirim }}</td>
+            <td class="px-4 py-3"><span class="b-ok">{{ r.kondisi_arsip or 'BAIK' }}</span></td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <button onclick="loadDetail({{ r._baris }})" class="text-[11px] text-primary font-semibold hover:underline mr-3">Detail</button>
+              <button onclick="loadHapus({{ r._baris }})" class="text-[11px] text-red-500 font-semibold hover:underline">Hapus</button>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="px-4 py-10 text-center text-muted">Belum ada data arsip.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if total_hal > 1 %}
+  <div class="flex items-center justify-between">
+    <p class="text-[12px] text-muted">Halaman {{ hal }} dari {{ total_hal }}</p>
+    <div class="flex gap-2">
+      {% if hal > 1 %}
+      <a href="?q={{ q }}&sub={{ sub }}&tahun={{ tahun }}&hal={{ hal-1 }}"
+        class="px-4 py-2 text-[12px] font-semibold border border-border rounded-lg hover:border-primary/40 transition-colors">← Sebelumnya</a>
+      {% endif %}
+      {% if hal < total_hal %}
+      <a href="?q={{ q }}&sub={{ sub }}&tahun={{ tahun }}&hal={{ hal+1 }}"
+        class="px-4 py-2 text-[12px] font-semibold bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Berikutnya →</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Hidden htmx target for modal -->
+<div id="modal-inner" style="display:none"></div>
+
+<script>
+const BID = "{{ bidang_id }}";
+function loadDetail(baris) {
+  fetch(`/b/${BID}/data/${baris}/detail`)
+    .then(r=>r.text()).then(html=>openModal(html));
+}
+function loadEdit(baris) {
+  fetch(`/b/${BID}/data/${baris}/edit`)
+    .then(r=>r.text()).then(html=>openModal(html));
+}
+function loadHapus(baris) {
+  fetch(`/b/${BID}/data/${baris}/konfirmasi-hapus`)
+    .then(r=>r.text()).then(html=>openModal(html));
+}
+</script>
+{% endblock %}

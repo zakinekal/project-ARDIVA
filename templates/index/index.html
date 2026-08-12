@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARDIVA — ARsip DInamis serVice Automation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: { DEFAULT:'#0D6B52', light:'#12855F', dark:'#0A5241', faint:'#E8F5F0' },
+        ink: '#0F1E2D',
+        muted: '#5A6A7A',
+      },
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'monospace'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #FAFBFC; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* Hero gradient line */
+  .hero-line {
+    background: linear-gradient(90deg, #0D6B52 0%, #12855F 50%, #C9973A 100%);
+    height: 3px;
+    width: 60px;
+  }
+
+  /* Animated grid background */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(13,107,82,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,107,82,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Card hover */
+  .feature-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(13,107,82,0.12);
+  }
+
+  /* Step connector */
+  .step-connector::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: calc(100% + 8px);
+    width: calc(100% - 16px);
+    height: 1px;
+    background: linear-gradient(90deg, #0D6B52, transparent);
+  }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body class="text-ink antialiased">
+
+<!-- ── NAVBAR ─────────────────────────────────────────────────────────── -->
+<nav class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
+  <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
+          <path d="M10 12h4"/>
+        </svg>
+      </div>
+      <span class="font-bold text-[15px] tracking-tight text-ink">ARDIVA</span>
+      <span class="hidden sm:inline text-gray-300 text-xs">|</span>
+      <span class="hidden sm:inline text-[11px] text-muted font-medium">DPMPD Kalimantan Timur</span>
+    </div>
+    <a href="/login"
+      class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+      </svg>
+      Masuk
+    </a>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────────────────── -->
+<section class="grid-bg relative overflow-hidden">
+  <div class="max-w-6xl mx-auto px-6 py-20 sm:py-28">
+    <div class="max-w-2xl">
+      <div class="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 text-primary text-[11px] font-semibold px-3 py-1.5 rounded-full mb-6 mono">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+        DPMPD KALIMANTAN TIMUR — SISTEM KEARSIPAN DIGITAL
+      </div>
+      <h1 class="text-[36px] sm:text-[52px] font-extrabold leading-[1.1] tracking-tight text-ink mb-4">
+        Arsip lebih cepat,<br>
+        <span class="text-primary">tanpa ketik ulang.</span>
+      </h1>
+      <div class="hero-line mb-6"></div>
+      <p class="text-[16px] text-muted leading-relaxed mb-8 max-w-lg">
+        ARDIVA membaca isi surat PDF secara otomatis, mencocokkan kode klasifikasi dari Pergub No. 9 Tahun 2024, dan menyimpan data langsung ke Google Sheets — dalam hitungan detik.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/login"
+          class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3 rounded-xl transition-colors text-[14px] shadow-lg shadow-primary/20">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+          </svg>
+          Masuk ke Sistem
+        </a>
+        <a href="#cara-pakai"
+          class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-primary/30 text-ink font-semibold px-6 py-3 rounded-xl transition-colors text-[14px]">
+          Cara Penggunaan
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 9l-7 7-7-7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative element -->
+  <div class="absolute right-0 top-0 h-full w-1/3 hidden lg:block">
+    <div class="absolute right-12 top-1/2 -translate-y-1/2 w-72 h-72 rounded-3xl bg-primary/5 border border-primary/10 flex items-center justify-center">
+      <div class="w-48 h-48 rounded-2xl bg-primary/8 border border-primary/15 flex items-center justify-center">
+        <svg class="w-24 h-24 text-primary/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
+          <path d="M10 12h4M10 16h4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FITUR UNGGULAN ─────────────────────────────────────────────────── -->
+<section class="py-16 sm:py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <p class="mono text-[11px] font-semibold text-primary tracking-widest uppercase mb-2">Fitur Unggulan</p>
+      <h2 class="text-[28px] sm:text-[34px] font-bold text-ink">Dirancang untuk efisiensi nyata</h2>
+      <p class="text-muted text-[14px] mt-2 max-w-lg mx-auto">Setiap fitur dibangun berdasarkan kebutuhan langsung dari proses pengarsipan di DPMPD.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <!-- Fitur 1 -->
+      <div class="feature-card bg-white border border-gray-100 rounded-2xl p-6 reveal">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Ekstraksi PDF Otomatis</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Upload surat PDF — nomor surat, tanggal, perihal, dan pengirim terbaca secara otomatis tanpa ketik ulang.</p>
+      </div>
+
+      <!-- Fitur 2 -->
+      <div class="feature-card bg-white border border-gray-100 rounded-2xl p-6 reveal" style="transition-delay:0.05s">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Kode Klasifikasi dari Pergub</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Retensi aktif, inaktif, keterangan, dan SKKD terisi otomatis dari database 3.151 kode Pergub No. 9 Tahun 2024.</p>
+      </div>
+
+      <!-- Fitur 3 -->
+      <div class="feature-card bg-white border border-gray-100 rounded-2xl p-6 reveal" style="transition-delay:0.1s">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Simpan ke Google Sheets</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Data tersimpan langsung ke spreadsheet masing-masing bidang. Bisa dibuka kapan saja, dari perangkat manapun.</p>
+      </div>
+
+      <!-- Fitur 4 -->
+      <div class="feature-card bg-white border border-gray-100 rounded-2xl p-6 reveal" style="transition-delay:0.15s">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Login per Bidang</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Setiap bidang login dengan akun Google masing-masing dan hanya bisa mengakses data milik bidangnya sendiri.</p>
+      </div>
+
+      <!-- Fitur 5 -->
+      <div class="feature-card bg-white border border-gray-100 rounded-2xl p-6 reveal" style="transition-delay:0.2s">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Cari, Filter, dan Edit</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Data arsip bisa dicari berdasarkan nomor surat, perihal, atau pengirim. Filter per tahun dan sub kegiatan tersedia.</p>
+      </div>
+
+      <!-- Fitur 6 -->
+      <div class="feature-card bg-white border border-gray-100 rounded-2xl p-6 reveal" style="transition-delay:0.25s">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Ekspor Data</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Rekap data arsip dapat diekspor untuk keperluan pelaporan atau dokumentasi fisik kapan pun dibutuhkan.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CARA PENGGUNAAN ─────────────────────────────────────────────────── -->
+<section id="cara-pakai" class="py-16 sm:py-20 bg-surface" style="background:#F5F7FA">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <p class="mono text-[11px] font-semibold text-primary tracking-widest uppercase mb-2">Cara Penggunaan</p>
+      <h2 class="text-[28px] sm:text-[34px] font-bold text-ink">Tiga langkah, surat tersimpan</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 relative">
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 reveal relative">
+        <div class="w-8 h-8 rounded-lg bg-primary text-white mono text-[13px] font-bold flex items-center justify-center mb-4">01</div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Login dengan akun bidang</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Masuk menggunakan akun Google resmi bidang Anda. Sistem secara otomatis mengarahkan ke halaman khusus bidang tersebut.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 reveal relative" style="transition-delay:0.1s">
+        <div class="w-8 h-8 rounded-lg bg-primary text-white mono text-[13px] font-bold flex items-center justify-center mb-4">02</div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Upload file PDF surat</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Unggah file PDF surat. Sistem membaca nomor surat, tanggal, perihal, pengirim, dan mencocokkan kode klasifikasi dari Pergub secara otomatis.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 reveal relative" style="transition-delay:0.2s">
+        <div class="w-8 h-8 rounded-lg bg-primary text-white mono text-[13px] font-bold flex items-center justify-center mb-4">03</div>
+        <h3 class="font-bold text-[15px] text-ink mb-2">Verifikasi dan simpan</h3>
+        <p class="text-[13px] text-muted leading-relaxed">Periksa hasil yang muncul di form, koreksi jika perlu, lalu klik Simpan. Data langsung masuk ke Google Sheets bidang.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────────── -->
+<footer class="bg-[#0A1628] text-slate-400 py-10">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <div class="w-6 h-6 rounded-md bg-primary/30 flex items-center justify-center">
+        <svg class="w-3.5 h-3.5 text-primary-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
+        </svg>
+      </div>
+      <span class="text-[13px] font-semibold text-slate-200">ARDIVA</span>
+      <span class="text-[11px]">— ARsip DInamis serVice Automation</span>
+    </div>
+    <p class="text-[11px]">DPMPD Provinsi Kalimantan Timur · 2026</p>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
