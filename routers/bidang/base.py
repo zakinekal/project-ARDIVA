@@ -303,6 +303,18 @@ async def hapus_eksekusi(request: Request, bidang_id: str, baris: int):
              hasil=hasil)
     )
 
+# ═══════════════════════════════════════════════════════════════════════════
+# PANDUAN
+# ═══════════════════════════════════════════════════════════════════════════
+@router.get("/panduan")
+async def panduan_page(request: Request, bidang_id: str):
+    redir, ctx = _cek_akses(request, bidang_id)
+    if redir:
+        return redir
+    return templates.TemplateResponse(
+        "bidang/panduan.html",
+        _ctx(request, bidang_id, ctx["user"], ctx["bidang"], active_page="panduan")
+    )
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HELPER
