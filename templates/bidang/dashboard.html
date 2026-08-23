@@ -45,7 +45,7 @@
     <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb2">
       Total Arsip
     </p>
-    <p class="text-[36px] font-extrabold text-primary">
+    <p class="text-[36px] font-extrabold text-primary" style="color:#0D6B52">
       {{ status.jumlah_data or 0 }}
     </p>
     <p class="text-[12px] text-muted mt-1">entri tersimpan</p>
@@ -56,7 +56,7 @@
       <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">
         Surat Keluar / Masuk
       </p>
-      <p class="text-[36px] font-extrabold text-primary">
+      <p class="text-[36px] font-extrabold text-primary" style="color:#0D6B52">
         {{ total_keluar }} <span class="text-xl font-normal text-muted">/</span>
         {{ total_masuk }}
       </p>
@@ -70,7 +70,7 @@
       <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">
         Kondisi Baik / Rusak
       </p>
-      <p class="text-[36px] font-extrabold text-primary">
+      <p class="text-[36px] font-extrabold text-primary" style="color:#0D6B52">
         {{ total_baik }} <span class="text-xl font-normal text-muted">/</span>
         {{ total_rusak }}
       </p>
@@ -87,8 +87,8 @@
       <p class="text-[13px] font-bold text-ink">Tren Arsip per Bulan</p>
       <span class="text-[11px] text-muted">Tahun berjalan</span>
     </div>
-    <div class="h-52">
-      <canvas id="grafikArsip"></canvas>
+    <div class="relative h-52 w-full">
+      <canvas id="grafikArsip" style="width:100% !important; height:100% !important"></canvas>
     </div>
   </div>
 
@@ -106,6 +106,7 @@
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true, grid: { color: "#E4E9F0" } } }
     }
