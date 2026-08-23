@@ -1,0 +1,114 @@
+{% extends "bidang/base_bidang.html" %}
+{% block title %}Input Manual - {{ bidang.nama_pendek }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-8 py-8">
+  <div class="mb-6">
+    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">
+      Input Manual</p>
+    <h1 class="text-[22px] font-extrabold text-ink">Input Data Tanpa PDF</h1>
+    <p class="text-muted text-[13px] mt-1">
+      Isi seluruh kolom secara manual. Field bertanda * wajib diisi.</p>
+  </div>
+  <div class="mb-4">
+    <a href="/b/{{ bidang_id }}/input"
+       class="text-[13px] text-muted hover:text-primary transition-colors">
+      ← Kembali ke upload PDF</a>
+  </div>
+  <form hx-post="/b/{{ bidang_id }}/input/simpan"
+        hx-target="#hasil-simpan" hx-swap="innerHTML"
+        hx-indicator="#spin-manual" class="space-y-4">
+
+    <div class="card p-5">
+      <h2 class="text-[14px] font-bold text-ink mb-4">Data Surat</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="fl"><label>No Surat <span class="rq">*</span></label>
+          <input type="text" name="no_surat" required class="mono"
+                 placeholder="400.10.2.1/123/DPMPD-II/2026"></div>
+        <div class="fl"><label>Uraian Arsip / Perihal <span class="rq">*</span></label>
+          <input type="text" name="uraian_arsip" required
+                 placeholder="Isi sesuai perihal surat"></div>
+        <div class="fl"><label>Tanggal Surat (DD/MM/YYYY)</label>
+          <input type="text" name="tanggal_surat" class="mono"
+                 placeholder="05/07/2026"></div>
+        <div class="fl"><label>Tahun</label>
+          <input type="text" name="tahun" class="mono" placeholder="2026"></div>
+        <div class="fl"><label>Pengirim</label>
+          <input type="text" name="pengirim"
+                 placeholder="Nama instansi pengirim"></div>
+        <div class="fl"><label>Jumlah (Lembar)</label>
+          <input type="text" name="jumlah" class="mono"
+                 placeholder="3 LEMBAR"></div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h2 class="text-[14px] font-bold text-ink mb-4">Klasifikasi Arsip</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="fl"><label>Kode Klas</label>
+          <input type="text" name="kode_klas" class="mono"
+                 placeholder="400.10.2.1"></div>
+        <div class="fl"><label>Sub Kegiatan</label>
+          <select name="sub_kegiatan">
+            {% for s in sub_list %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select></div>
+        <div class="fl"><label>Retensi Aktif</label>
+          <input type="text" name="retensi_aktif"
+                 placeholder="Contoh: 2 Tahun"></div>
+        <div class="fl"><label>Retensi Inaktif</label>
+          <input type="text" name="retensi_inaktif"
+                 placeholder="Contoh: 3 Tahun"></div>
+        <div class="fl"><label>Keterangan</label>
+          <input type="text" name="keterangan_jra"
+                 placeholder="MUSNAH / PERMANEN"></div>
+        <div class="fl"><label>SKKD</label>
+          <input type="text" name="skkd"
+                 placeholder="TERBUKA / TERTUTUP"></div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h2 class="text-[14px] font-bold text-ink mb-4">Detail Penyimpanan</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="fl"><label>TK Perkembangan</label>
+          <select name="tk_perkembangan">
+            <option value="COPY">COPY</option>
+            <option value="ASLI">ASLI</option>
+          </select></div>
+        <div class="fl"><label>Kondisi Arsip</label>
+          <select name="kondisi_arsip">
+            <option value="BAIK">BAIK</option>
+            <option value="RUSAK RINGAN">RUSAK RINGAN</option>
+            <option value="RUSAK BERAT">RUSAK BERAT</option>
+          </select></div>
+        <div class="fl"><label>Kategori Arsip</label>
+          <select name="kategori_arsip">
+            <option value="Surat Keluar">Surat Keluar</option>
+            <option value="Surat Masuk">Surat Masuk</option>
+            <option value="Musnah">Musnah</option>
+          </select></div>
+      </div>
+    </div>
+
+    <input type="hidden" name="nama_file_pdf" value="INPUT_MANUAL">
+    <input type="hidden" name="force" value="false">
+
+    <div class="flex flex-col sm:flex-row items-start gap-3">
+      <button type="submit"
+        class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark
+               text-white text-[13px] font-semibold px-6 py-2.5 rounded-lg transition-colors">
+        <svg id="spin-manual" class="htmx-indicator animate-spin w-4 h-4"
+             viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10"
+                  stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+        </svg>
+        Simpan ke Google Sheets
+      </button>
+      <div id="hasil-simpan" class="w-full"></div>
+    </div>
+  </form>
+</div>
+{% endblock %}

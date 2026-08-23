@@ -87,6 +87,19 @@ async def input_page(request: Request, bidang_id: str):
              active_page="input")
     )
 
+@router.get("/input/manual")
+async def input_manual_page(request: Request, bidang_id: str):
+    redir, ctx = _cek_akses(request, bidang_id)
+    if redir:
+        return redir
+    return templates.TemplateResponse(
+        "bidang/input_manual.html",
+        _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
+             active_page="input",
+             sub_list=ctx["bidang"]["sub_kegiatan"])
+    )
+
+
 
 @router.post("/input/proses")
 async def input_proses(request: Request, bidang_id: str, file: UploadFile = File(...)):
