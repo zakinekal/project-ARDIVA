@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}ARDIVA{% endblock %}</title>
-<script defer src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
@@ -87,7 +87,7 @@ tailwind.config = {
 <div class="flex min-h-screen">
 
   <!-- ── SIDEBAR ── -->
-  <aside class="sidebar w-60 bg-[#0A1628] flex flex-col shrink-0">
+  <aside class="sidebar w-60 bg-[#0A1628] flex flex-col shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto">
 
     <!-- Header -->
     <div class="px-4 py-4 border-b border-white/8">
@@ -182,6 +182,60 @@ tailwind.config = {
   </div>
 </div>
 
+{% if active_page == 'input' %}
+<!-- Floating Help Button -->
+<div class="fixed bottom-5 right-5 z-40">
+  <div id="help-panel" class="hidden mb-3 w-80 max-w-[85vw] card p-5 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <p class="font-bold text-[14px] text-ink">Cara Input Surat</p>
+      <button onclick="toggleHelp()" class="text-muted hover:text-ink">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+      <div class="flex items-start gap-2.5">
+        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</div>
+        <p class="text-[12px] text-muted">Upload file PDF surat pada halaman Input Surat.</p>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</div>
+        <p class="text-[12px] text-muted">Tunggu sistem membaca isi surat otomatis (10-15 detik).</p>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</div>
+        <p class="text-[12px] text-muted">Periksa hasilnya, koreksi jika ada yang salah baca.</p>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</div>
+        <p class="text-[12px] text-muted">Jika PDF tak terbaca, isi kolom secara manual.</p>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</div>
+        <p class="text-[12px] text-muted">Klik Simpan ke Google Sheets.</p>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</div>
+        <p class="text-[12px] text-muted">Notifikasi berhasil muncul — cek di Lihat Data.</p>
+      </div>
+    </div>
+    <a href="/b/{{ bidang_id }}/panduan" class="mt-4 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary-dark border-t border-border pt-3">
+      Lihat Panduan Lengkap
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  <div class="flex items-center gap-2 justify-end">
+    <span id="help-hint" class="bg-ink text-white text-[12px] font-medium px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap transition-opacity duration-500">
+      Butuh bantuan?
+    </span>
+    <button onclick="toggleHelp()" class="w-12 h-12 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg flex items-center justify-center transition-colors ring-4 ring-primary/20 shrink-0">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+      </svg>
+    </button>
+  </div>
+</div>
+{% endif %}
+
 <!-- Modal backdrop -->
 <div id="modal-backdrop" onclick="closeModal(event)">
   <div id="modal-content"></div>
@@ -193,6 +247,20 @@ function closeSidebar() { document.querySelector('.sidebar').classList.remove('o
 function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal-backdrop').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeModal(e)  { if(e.target===document.getElementById('modal-backdrop')){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; } }
 function closeModalForce(){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; }
+
+function toggleHelp(){
+  const panel = document.getElementById('help-panel');
+  if (panel) panel.classList.toggle('hidden');
+  const hint = document.getElementById('help-hint');
+  if (hint) hint.style.display = 'none';
+}
+setTimeout(function(){
+  const hint = document.getElementById('help-hint');
+  if (hint) {
+    hint.style.opacity = '0';
+    setTimeout(function(){ hint.style.display = 'none'; }, 500);
+  }
+}, 4000);
 
 // htmx modal target helper
 document.addEventListener('htmx:afterSwap', function(e) {

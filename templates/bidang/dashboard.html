@@ -11,16 +11,21 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-8 py-8">
 
   <!-- Header -->
-  <div class="mb-7">
+  <div class="mb-6">
     <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">{{ bidang.nama }}</p>
     <h1 class="text-[24px] sm:text-[28px] font-extrabold text-ink leading-tight">Selamat datang, {{ user.nama.split()[0] }}</h1>
     <p class="text-muted text-[13px] mt-1">Sistem Pengarsipan Digital ARDIVA · DPMPD Kalimantan Timur</p>
   </div>
 
   <!-- Status + CTA -->
-  <div class="card p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+  <div class="card p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
     <div class="flex items-center gap-3 flex-1 min-w-0">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 {% if status.status == 'success' %}bg-emerald-500{% else %}bg-red-500{% endif %}"></div>
+      <span class="relative flex w-2.5 h-2.5 shrink-0">
+        {% if status.status == "success" %}
+        <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+        {% endif %}
+        <span class="relative inline-flex rounded-full w-2.5 h-2.5 {% if status.status == 'success' %}bg-emerald-500{% else %}bg-red-500{% endif %}"></span>
+      </span>
       <div class="min-w-0">
         <p class="text-[14px] font-semibold text-ink">
           {% if status.status == "success" %}Terhubung ke Google Sheets{% else %}Google Sheets belum terhubung{% endif %}
@@ -31,102 +36,124 @@
       </div>
     </div>
     <a href="/b/{{ bidang_id }}/input"
-      class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-colors shrink-0">
+      class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-colors shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       Input Surat Baru
     </a>
   </div>
 
   <!-- Cards Statistik -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
 
-  <!-- Card 1: Total Arsip -->
-  <div class="card p-5">
-    <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb2">
-      Total Arsip
-    </p>
-    <p class="text-[36px] font-extrabold text-primary">
-      {{ status.jumlah_data or 0 }}
-    </p>
-    <p class="text-[12px] text-muted mt-1">entri tersimpan</p>
-  </div>
-  </div>
+    <!-- Card 1: Total Arsip -->
+    <div class="card p-5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">Total Arsip</p>
+      <p class="text-[36px] font-extrabold text-primary leading-none">{{ status.jumlah_data or 0 }}</p>
+      <p class="text-[12px] text-muted mt-2">entri tersimpan</p>
+    </div>
 
-  <!-- Card 2: Jumlah Surat Keluar vs Surat Masuk -->
-  <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">
-        Surat Keluar / Masuk
+    <!-- Card 2: Surat Keluar vs Surat Masuk -->
+    <div class="card p-5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">Surat Keluar / Masuk</p>
+      <p class="text-[36px] font-extrabold text-primary leading-none">
+        {{ total_keluar }} <span class="text-xl font-normal text-muted">/</span> {{ total_masuk }}
       </p>
-      <p class="text-[36px] font-extrabold text-primary">
-        {{ total_keluar }} <span class="text-xl font-normal text-muted">/</span>
-        {{ total_masuk }}
-      </p>
-      <p class="text-[12px] text-muted mt-1">
-        {{ total_keluar }} Keluar · {{ total_masuk }} Masuk
-      </p>
-  </div>
+      <p class="text-[12px] text-muted mt-2">{{ total_keluar }} Keluar · {{ total_masuk }} Masuk</p>
+    </div>
 
-  <!-- Card 3: Kondisi ARSIP Baik vs Rusak -->
-  <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">
-        Kondisi Baik / Rusak
+    <!-- Card 3: Kondisi Baik vs Rusak -->
+    <div class="card p-5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">Kondisi Baik / Rusak</p>
+      <p class="text-[36px] font-extrabold text-primary leading-none">
+        {{ total_baik }} <span class="text-xl font-normal text-muted">/</span> {{ total_rusak }}
       </p>
-      <p class="text-[36px] font-extrabold text-primary">
-        {{ total_baik }} <span class="text-xl font-normal text-muted">/</span>
-        {{ total_rusak }}
-      </p>
-      <p class="text-[12px] text-muted mt-1">
-        {{ total_baik }} Baik · {{ total_rusak }} Rusak
-      </p>
+      <p class="text-[12px] text-muted mt-2">{{ total_baik }} Baik · {{ total_rusak }} Rusak</p>
     </div>
   </div>
 
   <!-- Grafik Bar -->
+  <div class="card p-5 mb-6">
+    <div class="flex items-baseline justify-between mb-4">
+      <p class="text-[13px] font-bold text-ink">Tren Arsip per Bulan</p>
+      <p class="text-[11px] text-muted">Tahun berjalan</p>
+    </div>
+    <div class="relative h-[240px]">
+      <canvas id="grafikArsip"></canvas>
+    </div>
+  </div>
+
   <script>
-  new Chart(document.getElementById("grafikArsip"), {
-    type: "bar",
-    data: {
-      labels: ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"],
-      datasets: [{
-        label: "Jumlah Arsip",
-        data: [5, 8, 12, 7, 15, 20, 18, 10, 14, 9, 22, 16],
-        backgroundColor: "#0D6B52",
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, grid: { color: "#E4E9F0" } } }
-    }
-  });
+  (function () {
+    var ctx = document.getElementById("grafikArsip");
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"],
+        datasets: [{
+          label: "Jumlah Arsip",
+          data: [5, 8, 12, 7, 15, 20, 18, 10, 14, 9, 22, 16],
+          backgroundColor: "#0D6B52",
+          borderRadius: 6,
+          maxBarThickness: 28,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: "#E4E9F0" } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  })();
   </script>
 
-<!-- Tabel Arsip Perlu Ditinjau -->
-<div class="card p-5 mt-5">
-    <p class="text-[13px] font-bold text-ink mb-4">Arsip Perlu Ditinjau</p>
-    <table class="min-w-full text-[12px]">
-      <thead class="bg-surface border-b border-border">
-        <tr>
-          <th class="px-3 py-2 text-left text-[10px] text-muted uppercase">No Surat</th>
-          <th class="px-3 py-2 text-left text-[10px] text-muted uppercase">Uraian</th>
-          <th class="px-3 py-2 text-left text-[10px] text-muted uppercase">Retensi Aktif</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-border">
-        {% for r in rows[:5] %}
-        <tr>
-          <td class="px-3 py-2 mono">{{ r.no_surat }}</td>
-          <td class="px-3 py-2">{{ r.uraian_arsip[:40] }}</td>
-          <td class="px-3 py-2">{{ r.retensi_aktif }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <!-- Tabel Arsip Perlu Ditinjau -->
+  <div class="card p-5 mb-6">
+    <div class="flex items-baseline justify-between mb-4">
+      <p class="text-[13px] font-bold text-ink">Arsip Perlu Ditinjau</p>
+      {% if rows|length > 0 %}
+      <p class="text-[11px] text-muted">Menampilkan {{ rows[:5]|length }} dari {{ rows|length }}</p>
+      {% endif %}
+    </div>
+
+    {% if rows|length > 0 %}
+    <div class="overflow-x-auto -mx-5">
+      <table class="min-w-full text-[12px]">
+        <thead class="bg-surface border-y border-border">
+          <tr>
+            <th class="px-5 py-2 text-left text-[10px] font-semibold text-muted uppercase tracking-widest">No Surat</th>
+            <th class="px-5 py-2 text-left text-[10px] font-semibold text-muted uppercase tracking-widest">Uraian</th>
+            <th class="px-5 py-2 text-left text-[10px] font-semibold text-muted uppercase tracking-widest">Retensi Aktif</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          {% for r in rows[:5] %}
+          <tr class="hover:bg-surface/60 transition-colors">
+            <td class="px-5 py-2.5 mono text-ink">{{ r.no_surat }}</td>
+            <td class="px-5 py-2.5 text-ink">{{ r.uraian_arsip[:40] }}{% if r.uraian_arsip|length > 40 %}…{% endif %}</td>
+            <td class="px-5 py-2.5 text-muted">{{ r.retensi_aktif }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center text-center py-10">
+      <svg class="w-9 h-9 text-muted/40 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M4 7h16M4 12h16M4 17h10"/>
+      </svg>
+      <p class="text-[13px] font-semibold text-ink">Belum ada arsip yang perlu ditinjau</p>
+      <p class="text-[12px] text-muted mt-1 max-w-xs">Arsip baru akan muncul di sini setelah kamu menginput surat pertama.</p>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Info cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <div class="card p-5">
       <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Alur Kerja</p>
       <ol class="space-y-2 text-[13px] text-ink">
@@ -144,6 +171,7 @@
         </li>
       </ol>
     </div>
+
     <div class="card p-5">
       <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Otomatis Terisi</p>
       <ul class="space-y-1.5 text-[13px] text-ink">
@@ -155,6 +183,7 @@
         {% endfor %}
       </ul>
     </div>
+
     <div class="card p-5">
       <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Dasar Hukum</p>
       <p class="text-[13px] text-ink leading-relaxed">Peraturan Gubernur Kalimantan Timur <span class="font-semibold">No. 9 Tahun 2024</span> tentang Instrumen Pengelolaan Arsip Dinamis.</p>
@@ -162,10 +191,9 @@
     </div>
   </div>
 
-  <div class="flex justify-end mt-5">
-    <a href="/b/{{ bidang_id }}/data" class="text-[13px] text-primary font-medium hover:underline">
+  <div class="flex justify-end">
+    <a href="/b/{{ bidang_id }}/data" class="inline-flex items-center gap-1 text-[13px] text-primary font-medium hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded">
       Lihat semua data arsip →
     </a>
   </div>
-</div>
-{% endblock %}
+</div>{% endblock %}
