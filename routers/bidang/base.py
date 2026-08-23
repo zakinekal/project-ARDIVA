@@ -5,7 +5,9 @@ URL pattern: /b/{bidang_id}/...
 """
 
 import os
+import re
 import tempfile
+from datetime import datetime
 from fastapi import APIRouter, Request, UploadFile, File, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from starlette.concurrency import run_in_threadpool
@@ -21,6 +23,43 @@ from config import get_bidang_by_email, BIDANG_CONFIG
 router = APIRouter(prefix="/b/{bidang_id}")
 
 VALID_IDS = {"sekretariat", "pemdes", "bidang2", "bidang3", "bidang4"}
+
+
+def _hitung_arsip_bulanan(rows: list[dict], tahun: int | None = None) -> list[int]:
+    """Hitung arsip per bulan berdasarkan tanggal surat pada tahun berjalan."""
+    tahun = tahun or datetime.now().year
+    jumlah = [0] * 12
+    nama_bulan = {
+        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "mei": 5, "may": 5,
+        "jun": 6, "jul": 7, "agu": 8, "aug": 8, "sep": 9, "okt": 10,
+        "oct": 10, "nov": 11, "des": 12, "dec": 12,
+    }
+    pola_tanggal = (
+        r"(?P<year>\d{4})[-/]?(?P<month>\d{1,2})[-/]?(?P<day>\d{1,2})"
+        r"|(?P<day_alt>\d{1,2})[-/](?P<month_alt>\d{1,2})[-/](?P<year_alt>\d{4})"
+    )
+
+    for row in rows:
+        nilai = str(row.get("tanggal_surat", "")).strip()
+        match = re.search(pola_tanggal, nilai)
+        if match:
+            data = match.groupdict()
+            row_year = int(data["year"] or data["year_alt"])
+            month = int(data["month"] or data["month_alt"])
+        else:
+            month_match = re.search(
+                r"(?:^|\s)(jan|feb|mar|apr|mei|may|jun|jul|agu|aug|sep|okt|oct|nov|des|dec)[a-z]*\s+(\d{1,2}).*?(\d{4})",
+                nilai.lower(),
+            )
+            if not month_match:
+                continue
+            month = nama_bulan[month_match.group(1)[:3]]
+            row_year = int(month_match.group(3))
+
+        if row_year == tahun and 1 <= month <= 12:
+            jumlah[month - 1] += 1
+
+    return jumlah
 
 
 def _cek_akses(request: Request, bidang_id: str):
@@ -66,10 +105,12 @@ async def dashboard(request: Request, bidang_id: str):
         "message": hasil.get("message", ""),
     }
     rows  = hasil.get("data", []) if hasil.get("status") == "success" else []
+    chart_data = _hitung_arsip_bulanan(rows)
     return templates.TemplateResponse(
         "bidang/dashboard.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
-             active_page="dashboard", status=status, rows=rows)
+             active_page="dashboard", status=status, rows=rows,
+             chart_data=chart_data)
     )
 
 
