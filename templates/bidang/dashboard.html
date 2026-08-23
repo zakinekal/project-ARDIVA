@@ -50,7 +50,6 @@
     </p>
     <p class="text-[12px] text-muted mt-1">entri tersimpan</p>
   </div>
-  </div>
 
   <!-- Card 2: Jumlah Surat Keluar vs Surat Masuk -->
   <div class="card p-5">
@@ -78,10 +77,21 @@
       <p class="text-[12px] text-muted mt-1">
         {{ total_baik }} Baik · {{ total_rusak }} Rusak
       </p>
-    </div>
+  </div>
+
   </div>
 
   <!-- Grafik Bar -->
+  <div class="card p-5 mt-5">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-[13px] font-bold text-ink">Tren Arsip per Bulan</p>
+      <span class="text-[11px] text-muted">Tahun berjalan</span>
+    </div>
+    <div class="h-52">
+      <canvas id="grafikArsip"></canvas>
+    </div>
+  </div>
+
   <script>
   new Chart(document.getElementById("grafikArsip"), {
     type: "bar",
