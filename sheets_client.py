@@ -7,7 +7,7 @@ Setiap fungsi menerima spreadsheet_id untuk menentukan bidang tujuan.
 import requests
 from config import APPS_SCRIPT_URL, SECRET_TOKEN
 
-TIMEOUT = 25
+TIMEOUT = (5, 20)
 
 
 def _post(payload: dict) -> dict:

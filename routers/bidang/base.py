@@ -8,11 +8,12 @@ import os
 import tempfile
 from fastapi import APIRouter, Request, UploadFile, File, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
+from starlette.concurrency import run_in_threadpool
 from typing import Optional
 from core import templates, get_matcher
 from sheets_client import (
     simpan_arsip, ambil_semua_data, update_arsip,
-    hapus_arsip, cek_status
+    hapus_arsip
 )
 from baca_surat import ekstrak_surat
 from config import get_bidang_by_email, BIDANG_CONFIG
@@ -58,8 +59,12 @@ async def dashboard(request: Request, bidang_id: str):
     if redir:
         return redir
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    status = cek_status(spreadsheet_id)
-    hasil = ambil_semua_data(spreadsheet_id)
+    hasil = await run_in_threadpool(ambil_semua_data, spreadsheet_id)
+    status = {
+        "status": hasil.get("status", "error"),
+        "jumlah_data": len(hasil.get("data", [])),
+        "message": hasil.get("message", ""),
+    }
     rows  = hasil.get("data", []) if hasil.get("status") == "success" else []
     return templates.TemplateResponse(
         "bidang/dashboard.html",
@@ -89,7 +94,7 @@ async def input_proses(request: Request, bidang_id: str, file: UploadFile = File
     if redir:
         return redir
 
-    matcher = get_matcher()
+    matcher = await run_in_threadpool(get_matcher)
     sub_list = ctx["bidang"]["sub_kegiatan"]
 
     try:
@@ -97,7 +102,7 @@ async def input_proses(request: Request, bidang_id: str, file: UploadFile = File
             tmp.write(await file.read())
             tmp_path = tmp.name
         try:
-            data = ekstrak_surat(tmp_path)
+            data = await run_in_threadpool(ekstrak_surat, tmp_path)
         finally:
             os.remove(tmp_path)
     except Exception as e:
@@ -136,7 +141,7 @@ async def input_kandidat(
     redir, ctx = _cek_akses(request, bidang_id)
     if redir:
         return redir
-    matcher = get_matcher()
+    matcher = await run_in_threadpool(get_matcher)
     kandidat_kode = _kandidat_kode(matcher, uraian_untuk_klasifikasi, sub_kegiatan, kode_dari_nomor)
     return templates.TemplateResponse(
         "bidang/partials/kode_area.html",
@@ -158,7 +163,7 @@ async def input_simpan(request: Request, bidang_id: str):
     unit_pengolah  = ctx["bidang"]["nama"]
 
     row["unit_pengolah"] = unit_pengolah
-    hasil = simpan_arsip(row, spreadsheet_id, force=force)
+    hasil = await run_in_threadpool(simpan_arsip, row, spreadsheet_id, force)
 
     return templates.TemplateResponse(
         "bidang/partials/simpan_hasil.html",
@@ -180,7 +185,7 @@ async def data_page(
         return redir
 
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    hasil = ambil_semua_data(spreadsheet_id)
+    hasil = await run_in_threadpool(ambil_semua_data, spreadsheet_id)
     rows  = hasil.get("data", []) if hasil.get("status") == "success" else []
 
     # Filter
@@ -203,7 +208,7 @@ async def data_page(
     rows_hal = rows[(hal-1)*PER_HAL : hal*PER_HAL]
 
     # Daftar unik untuk filter dropdown
-    semua = ambil_semua_data(spreadsheet_id).get("data", [])
+    semua = hasil.get("data", [])
     sub_list  = sorted({r.get("sub_kegiatan","") for r in semua if r.get("sub_kegiatan","")})
     tahun_list = sorted({r.get("tahun","") for r in semua if r.get("tahun","")}, reverse=True)
 
@@ -228,7 +233,7 @@ async def data_detail(request: Request, bidang_id: str, baris: int):
     if redir:
         return redir
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    hasil = ambil_semua_data(spreadsheet_id)
+    hasil = await run_in_threadpool(ambil_semua_data, spreadsheet_id)
     rows  = hasil.get("data", [])
     row   = next((r for r in rows if r.get("_baris") == baris), None)
     return templates.TemplateResponse(
@@ -243,10 +248,10 @@ async def data_edit_form(request: Request, bidang_id: str, baris: int):
     if redir:
         return redir
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    hasil = ambil_semua_data(spreadsheet_id)
+    hasil = await run_in_threadpool(ambil_semua_data, spreadsheet_id)
     rows  = hasil.get("data", [])
     row   = next((r for r in rows if r.get("_baris") == baris), None)
-    matcher  = get_matcher()
+    matcher  = await run_in_threadpool(get_matcher)
     sub_list = ctx["bidang"]["sub_kegiatan"]
     return templates.TemplateResponse(
         "bidang/partials/form_edit.html",
@@ -263,7 +268,7 @@ async def data_edit_simpan(request: Request, bidang_id: str, baris: int):
         return redir
     form = dict(await request.form())
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    hasil = update_arsip(baris, form, spreadsheet_id)
+    hasil = await run_in_threadpool(update_arsip, baris, form, spreadsheet_id)
     return templates.TemplateResponse(
         "bidang/partials/edit_hasil.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
@@ -280,7 +285,7 @@ async def hapus_konfirmasi(request: Request, bidang_id: str, baris: int):
     if redir:
         return redir
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    hasil = ambil_semua_data(spreadsheet_id)
+    hasil = await run_in_threadpool(ambil_semua_data, spreadsheet_id)
     rows  = hasil.get("data", [])
     row   = next((r for r in rows if r.get("_baris") == baris), None)
     return templates.TemplateResponse(
@@ -296,7 +301,7 @@ async def hapus_eksekusi(request: Request, bidang_id: str, baris: int):
     if redir:
         return redir
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
-    hasil = hapus_arsip(baris, spreadsheet_id)
+    hasil = await run_in_threadpool(hapus_arsip, baris, spreadsheet_id)
     return templates.TemplateResponse(
         "bidang/partials/hapus_hasil.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
