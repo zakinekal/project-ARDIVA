@@ -78,21 +78,91 @@
       <p class="text-[11px] text-muted">Tahun berjalan</p>
     </div>
     <div class="relative h-[240px]">
-      <canvas id="grafikArsip"></canvas>
-    </div>
-  </div>
+  <canvas id="grafikArsip"></canvas>
+</div>
+<script id="grafikArsipData" type="application/json">{{ rows | tojson | safe }}</script>
 
-  <script>
+<script>
   (function () {
-    var ctx = document.getElementById("grafikArsip");
-    if (!ctx) return;
-    new Chart(ctx, {
+    var canvas = document.getElementById("grafikArsip");
+    if (!canvas) return;
+
+    var rowsData = [];
+    try {
+      var dataEl = document.getElementById("grafikArsipData");
+      rowsData = JSON.parse(dataEl.textContent || "[]");
+    } catch (e) {
+      console.error("Gagal parse data rows untuk grafik:", e);
+      rowsData = [];
+    }
+
+    var monthlyCounts = new Array(12).fill(0);
+
+    rowsData.forEach(function (r) {
+      var tglStr = "";
+
+      if (typeof r === "object" && r !== null) {
+        if (Array.isArray(r)) {
+          tglStr = r[2] || ""; // Kolom C (TANGGAL SURAT)
+        } else {
+          tglStr = r.tanggal_surat || r["TANGGAL SURAT"] || r.tanggal || "";
+          if (!tglStr) {
+            for (var k in r) {
+              var kl = k.toLowerCase();
+              if (kl.includes("tanggal") || kl.includes("tgl")) {
+                tglStr = r[k];
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (tglStr) {
+        var monthNum = -1;
+        var str = String(tglStr).trim();
+
+        // 1. Tangani jika Google Apps Script mengirimkan string ISO Date (misal: "2026-08-04T...")
+        if (str.includes("T") || str.includes("GMT") || str.includes("Z")) {
+          var d = new Date(str);
+          if (!isNaN(d.getTime())) {
+            monthNum = d.getMonth() + 1;
+          }
+        } else {
+          // 2. Tangani format teks biasa (DD/MM/YYYY atau YYYY-MM-DD)
+          var parts = str.split(/[\/\-\.]/);
+          if (parts.length >= 3) {
+            var p0 = parseInt(parts[0], 10);
+            var p1 = parseInt(parts[1], 10);
+
+            if (parts[0].length === 4) {
+              // Format YYYY-MM-DD -> parts[1] adalah bulan
+              monthNum = p1;
+            } else {
+              // Format Indonesia DD/MM/YYYY -> parts[1] adalah bulan (08 = Agustus)
+              // Jika p0 <= 12 dan p1 > 12 (terbalik karena format US MM/DD/YYYY), tukar nilainya
+              if (p0 <= 12 && p1 > 12) {
+                monthNum = p0;
+              } else {
+                monthNum = p1;
+              }
+            }
+          }
+        }
+
+        if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
+          monthlyCounts[monthNum - 1] += 1;
+        }
+      }
+    });
+
+    new Chart(canvas, {
       type: "bar",
       data: {
-        labels: ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"],
+        labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
         datasets: [{
           label: "Jumlah Arsip",
-          data: [5, 8, 12, 7, 15, 20, 18, 10, 14, 9, 22, 16],
+          data: monthlyCounts,
           backgroundColor: "#0D6B52",
           borderRadius: 6,
           maxBarThickness: 28,
@@ -103,13 +173,17 @@
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          y: { beginAtZero: true, grid: { color: "#E4E9F0" } },
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0, stepSize: 1 },
+            grid: { color: "#E4E9F0" }
+          },
           x: { grid: { display: false } }
         }
       }
     });
   })();
-  </script>
+</script>
 
   <!-- Tabel Arsip Perlu Ditinjau -->
   <div class="card p-5 mb-6">
