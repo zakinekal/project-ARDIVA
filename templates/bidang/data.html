@@ -2,6 +2,40 @@
 {% block title %}Data Arsip — {{ bidang.nama_pendek }}{% endblock %}
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 sm:px-8 py-8">
+  {% if delete_success %}
+  <div id="delete-success-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 px-4" role="dialog" aria-modal="true" aria-labelledby="delete-success-title">
+    <div class="success-modal-card w-full max-w-md rounded-2xl bg-white px-6 py-9 text-center shadow-2xl">
+      <div class="success-check-circle mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-full border-[5px] border-primary">
+        <svg class="h-16 w-16 text-primary" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+          <path class="success-check" d="M10 25l9 9 19-20"/>
+        </svg>
+      </div>
+      <h2 id="delete-success-title" class="text-[22px] font-bold text-ink">Berhasil</h2>
+      <p class="mt-2 text-[14px] text-muted">Data berhasil dihapus dari Google Sheets.</p>
+      <button type="button" onclick="tutupNotifikasiHapus()"
+        class="mt-7 rounded-lg bg-primary px-8 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-dark">
+        OK
+      </button>
+    </div>
+  </div>
+  {% endif %}
+  {% if edit_success %}
+  <div id="edit-success-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 px-4" role="dialog" aria-modal="true" aria-labelledby="edit-success-title">
+    <div class="success-modal-card w-full max-w-md rounded-2xl bg-white px-6 py-9 text-center shadow-2xl">
+      <div class="success-check-circle mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-full border-[5px] border-primary">
+        <svg class="h-16 w-16 text-primary" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+          <path class="success-check" d="M10 25l9 9 19-20"/>
+        </svg>
+      </div>
+      <h2 id="edit-success-title" class="text-[22px] font-bold text-ink">Berhasil</h2>
+      <p class="mt-2 text-[14px] text-muted">Data berhasil diperbarui di Google Sheets.</p>
+      <button type="button" onclick="tutupNotifikasiEdit()"
+        class="mt-7 rounded-lg bg-primary px-8 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-dark">
+        OK
+      </button>
+    </div>
+  </div>
+  {% endif %}
   <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
     <div>
       <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">Rekap Arsip</p>
@@ -151,5 +185,19 @@ function loadHapus(baris) {
   fetch(`/b/${BID}/data/${baris}/konfirmasi-hapus`)
     .then(r=>r.text()).then(html=>openModal(html));
 }
+function tutupNotifikasiHapus() {
+  const modal = document.getElementById('delete-success-modal');
+  if (modal) modal.remove();
+}
+function tutupNotifikasiEdit() {
+  const modal = document.getElementById('edit-success-modal');
+  if (modal) modal.remove();
+}
+{% if delete_success %}
+setTimeout(tutupNotifikasiHapus, 1800);
+{% endif %}
+{% if edit_success %}
+setTimeout(tutupNotifikasiEdit, 1800);
+{% endif %}
 </script>
 {% endblock %}

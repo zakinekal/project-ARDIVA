@@ -7,7 +7,8 @@
   </div>
 
   {% if row %}
-  <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/edit" hx-target="#edit-hasil" hx-swap="innerHTML" hx-indicator="#spin-simpan" class="space-y-4">
+  <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/edit" hx-target="#edit-hasil" hx-swap="innerHTML" hx-indicator="#spin-simpan" class="space-y-4"
+    hx-on::before-request="this.querySelector('button[type=submit]').disabled = true">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div class="fl"><label>No Surat</label><input type="text" name="no_surat" value="{{ row.no_surat }}" class="mono"></div>
       <div class="fl"><label>Uraian Arsip / Perihal</label><input type="text" name="uraian_arsip" value="{{ row.uraian_arsip }}"></div>
@@ -67,7 +68,7 @@
     <div class="flex gap-3 pt-3 border-t border-border">
       <button type="submit"
         class="flex-1 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors inline-flex items-center justify-center gap-2">
-        <svg id="spin-simpan" class="htmx-indicator animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <svg id="spin-simpan" class="loading-icon htmx-indicator animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
         </svg>
