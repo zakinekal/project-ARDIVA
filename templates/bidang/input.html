@@ -136,9 +136,10 @@
 
 
     <!-- Form -->
-    <form id="form-upload-pdf" method="post"
+        <form id="form-upload-pdf" method="post"
           action="/b/{{ bidang_id }}/input/proses"
-          enctype="multipart/form-data">
+          enctype="multipart/form-data"
+          onsubmit="mulaiLoading(this)">
 
 
       <!-- KOTAK UPLOAD -->
@@ -202,6 +203,7 @@
 
       <!-- TOMBOL PROSES -->
       <button
+        id="btn-proses"
         type="submit"
         class="mt-4 inline-flex items-center gap-2
                bg-primary hover:bg-primary-dark text-white
@@ -212,7 +214,7 @@
         <!-- Loading -->
         <svg
           id="spin-proses"
-          class="htmx-indicator animate-spin w-4 h-4"
+          class="loading-icon animate-spin w-4 h-4"
           viewBox="0 0 24 24"
           fill="none">
 
@@ -320,6 +322,14 @@ function tampilkanFile(input) {
 
     }
 
+}
+
+function mulaiLoading(form) {
+  const button = form.querySelector('button[type="submit"]');
+  if (button) {
+    button.disabled = true;
+    button.classList.add('is-loading');
+  }
 }
 
 </script>
