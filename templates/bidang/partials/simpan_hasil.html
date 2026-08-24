@@ -1,12 +1,25 @@
+<div id="simpan-hasil">
 {% if hasil.status == "success" %}
 <div class="flex items-center gap-2 text-primary text-[13px] font-semibold">
   <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
   Tersimpan sebagai nomor {{ hasil.nomor }} (baris ke-{{ hasil.nomor_baris }})
 </div>
+{% if row.nama_file %}
+<p class="text-[12px] text-muted mt-1 ml-6">File: <span class="mono">{{ row.nama_file }}</span></p>
+{% endif %}
 
 {% elif hasil.status == "duplikat" %}
-<div class="bg-amber-50 border border-amber-200 text-amber-800 text-[13px] px-4 py-3 rounded-xl w-full">
-  <p class="font-medium mb-3">{{ hasil.message }}</p>
+<div class="bg-amber-50 border border-amber-300 text-amber-900 text-[13px] px-4 py-4 rounded-xl w-full">
+  <div class="flex items-start gap-3">
+    <svg class="w-5 h-5 mt-0.5 shrink-0 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    </svg>
+    <div>
+      <p class="font-bold text-[14px]">Nomor Surat Duplikat</p>
+      <p class="mt-1">Nomor surat <span class="font-bold mono">{{ hasil.no_surat or row.no_surat }}</span> sudah ada di Google Sheets{% if hasil.baris_lama %} pada baris {{ hasil.baris_lama }}{% endif %}.</p>
+      <p class="mt-1 text-[12px]">Periksa kembali data sebelum menyimpan. Jika ini memang entri berbeda, Anda dapat menyimpannya sebagai data baru.</p>
+    </div>
+  </div>
   <form hx-post="/b/{{ bidang_id }}/input/simpan" hx-target="#simpan-hasil" hx-swap="innerHTML">
     {% for k, v in row.items() %}
     <input type="hidden" name="{{ k }}" value="{{ v }}">
@@ -14,7 +27,7 @@
     <input type="hidden" name="force" value="true">
     <button type="submit"
       class="text-[12px] font-semibold bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg transition-colors">
-      Ya, tetap simpan sebagai entri baru
+      Simpan sebagai entri baru
     </button>
   </form>
 </div>
@@ -25,3 +38,4 @@
   Gagal menyimpan: {{ hasil.message }}
 </div>
 {% endif %}
+</div>

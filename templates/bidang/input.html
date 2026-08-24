@@ -1,94 +1,327 @@
 {% extends "bidang/base_bidang.html" %}
 {% block title %}Input Surat — {{ bidang.nama_pendek }}{% endblock %}
+
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-8 py-8">
 
   <!-- Header -->
   <div class="mb-8">
-    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">Input Surat Masuk</p>
-    <h1 class="text-[22px] sm:text-[26px] font-extrabold text-ink">Tambah Surat Masuk</h1>
-    <p class="text-muted text-[13px] mt-1">Pilih metode input di bawah ini untuk mulai mencatat surat masuk.</p>
+    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">
+      Input Surat Masuk
+    </p>
+
+    <h1 class="text-[22px] sm:text-[26px] font-extrabold text-ink">
+      Tambah Surat Masuk
+    </h1>
+
+    <p class="text-muted text-[13px] mt-1">
+      Pilih metode input di bawah ini untuk mulai mencatat surat masuk.
+    </p>
   </div>
+
+  {% if save_success %}
+  <div id="success-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 px-4" role="dialog" aria-modal="true" aria-labelledby="success-title">
+    <div class="success-modal-card w-full max-w-md rounded-2xl bg-white px-6 py-9 text-center shadow-2xl">
+      <div class="success-check-circle mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-full border-[5px] border-primary">
+        <svg class="h-16 w-16 text-primary" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+          <path class="success-check" d="M10 25l9 9 19-20"/>
+        </svg>
+      </div>
+      <h2 id="success-title" class="text-[22px] font-bold text-ink">Berhasil</h2>
+      <p class="mt-2 text-[14px] text-muted">Surat berhasil disimpan ke Google Sheets.</p>
+      <p class="mt-5 text-[11px] font-semibold uppercase tracking-widest text-muted">Nomor Urut</p>
+      <p class="mt-1 text-[52px] font-extrabold leading-none text-primary mono">{{ saved_nomor or '—' }}</p>
+      <button type="button" onclick="document.getElementById('success-modal').remove()"
+        class="mt-7 rounded-lg bg-primary px-8 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-dark">
+        OK
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
 
   <!-- Pilihan Metode -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
 
-    <!-- Opsi 1: Otomatis (aktif) -->
+    <!-- Opsi 1: Otomatis -->
     <div class="relative card p-5 border-2 border-primary/25 bg-primary/[0.03]">
-      <span class="absolute top-4 right-4 text-[10px] font-bold tracking-wide uppercase text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+
+      <span class="absolute top-4 right-4 text-[10px] font-bold tracking-wide uppercase
+                   text-primary bg-primary/10 px-2 py-0.5 rounded-full">
         Direkomendasikan
       </span>
+
       <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-        <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="w-5 h-5 text-primary"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2">
           <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
         </svg>
       </div>
-      <h3 class="text-[14px] font-bold text-ink mb-1">Input Otomatis</h3>
+
+      <h3 class="text-[14px] font-bold text-ink mb-1">
+        Input Otomatis
+      </h3>
+
       <p class="text-muted text-[12.5px] leading-relaxed">
         Unggah berkas PDF surat masuk — sistem akan membaca dan mengisi data secara otomatis.
       </p>
+
     </div>
+
 
     <!-- Opsi 2: Manual -->
     <a href="/b/{{ bidang_id }}/input/manual"
-      class="group card p-5 border border-border hover:border-primary/30 hover:bg-primary/[0.02] transition-colors">
-      <div class="w-10 h-10 rounded-lg bg-surface-alt border border-border flex items-center justify-center mb-3
-                  group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
-        <svg class="w-5 h-5 text-muted group-hover:text-primary transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+       class="group card p-5 border border-border hover:border-primary/30
+              hover:bg-primary/[0.02] transition-colors">
+
+      <div class="w-10 h-10 rounded-lg bg-surface-alt border border-border
+                  flex items-center justify-center mb-3
+                  group-hover:border-primary/30
+                  group-hover:bg-primary/10 transition-colors">
+
+        <svg class="w-5 h-5 text-muted group-hover:text-primary transition-colors"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2">
+          <path d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5
+                   M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4
+                   9.5-9.5z"/>
         </svg>
+
       </div>
-      <h3 class="text-[14px] font-bold text-ink mb-1 group-hover:text-primary transition-colors">Input Manual</h3>
+
+      <h3 class="text-[14px] font-bold text-ink mb-1
+                 group-hover:text-primary transition-colors">
+        Input Manual
+      </h3>
+
       <p class="text-muted text-[12.5px] leading-relaxed">
         Ketik langsung data surat satu per satu tanpa berkas PDF.
       </p>
+
     </a>
 
   </div>
 
+
+
   <!-- Card Upload -->
   <div class="card p-5 sm:p-6">
+
+    <!-- Judul -->
     <div class="flex items-center gap-2 mb-5">
+
       <div class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-        <svg class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+        <svg class="w-3.5 h-3.5 text-primary"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2">
           <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
         </svg>
+
       </div>
-      <h2 class="text-[13px] font-bold text-ink uppercase tracking-wide">Berkas PDF Surat Masuk</h2>
+
+      <h2 class="text-[13px] font-bold text-ink uppercase tracking-wide">
+        Berkas PDF Surat Masuk <span class="text-red-600 font-bold">*</span>
+      </h2>
+
     </div>
 
-    <form hx-post="/b/{{ bidang_id }}/input/proses" hx-target="#hasil-area" hx-swap="innerHTML"
-          hx-encoding="multipart/form-data" hx-indicator="#spin-proses">
 
-      <label for="file-surat"
-        class="flex flex-col items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-border
+
+    <!-- Form -->
+    <form id="form-upload-pdf" method="post"
+          action="/b/{{ bidang_id }}/input/proses"
+          enctype="multipart/form-data">
+
+
+      <!-- KOTAK UPLOAD -->
+      <label
+        for="file-surat"
+        id="upload-box"
+        class="flex flex-col items-center justify-center gap-2
+               w-full rounded-xl border-2 border-dashed border-border
                bg-surface-alt/50 px-6 py-10 text-center cursor-pointer
-               hover:border-primary/40 hover:bg-primary/[0.03] transition-colors">
-        <svg class="w-8 h-8 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-        </svg>
-        <span class="text-[13px] font-semibold text-ink">Klik untuk pilih berkas, atau seret ke sini</span>
-        <span class="text-[11.5px] text-muted">Format PDF, maksimal 10 MB</span>
-        <input id="file-surat" type="file" name="file" accept=".pdf" required class="hidden"
-          onchange="document.getElementById('file-name').textContent = this.files[0]?.name || 'Belum ada berkas dipilih'">
+               hover:border-primary/40 hover:bg-primary/[0.03]
+               transition-colors">
+
+
+        <!-- ICON UPLOAD -->
+        <div id="upload-icon"
+             class="w-12 h-12 rounded-xl bg-primary/10
+                    flex items-center justify-center">
+
+          <svg class="w-7 h-7 text-primary"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="1.75">
+
+            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1
+                     m-4-8l-4-4m0 0L8 8m4-4v12"/>
+
+          </svg>
+
+        </div>
+
+
+        <!-- NAMA FILE / TEKS -->
+        <span id="file-name"
+              class="text-[13px] font-semibold text-ink">
+          Klik untuk pilih berkas, atau seret ke sini
+        </span>
+
+
+        <!-- INFORMASI FILE -->
+        <span id="file-info"
+              class="text-[11.5px] text-muted">
+          Format PDF, maksimal 10 MB
+        </span>
+
+
+        <!-- INPUT FILE -->
+        <input
+          id="file-surat"
+          type="file"
+          name="file"
+          accept=".pdf,application/pdf"
+          required
+          class="hidden"
+          onchange="tampilkanFile(this)"
+        >
+
       </label>
 
-      <p id="file-name" class="text-[12.5px] text-muted mt-2.5 pl-1">Belum ada berkas dipilih</p>
 
-      <button type="submit"
-        class="mt-4 inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-6 py-2.5 rounded-lg shadow-sm transition-colors">
-        <svg id="spin-proses" class="htmx-indicator animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+
+      <!-- TOMBOL PROSES -->
+      <button
+        type="submit"
+        class="mt-4 inline-flex items-center gap-2
+               bg-primary hover:bg-primary-dark text-white
+               text-[13px] font-semibold px-6 py-2.5
+               rounded-lg shadow-sm transition-colors">
+
+
+        <!-- Loading -->
+        <svg
+          id="spin-proses"
+          class="htmx-indicator animate-spin w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none">
+
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"/>
+
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+
         </svg>
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+
+
+        <!-- Icon -->
+        <svg
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2">
+
+          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1
+                   m-4-8l-4-4m0 0L8 8m4-4v12"/>
+
         </svg>
+
+
         Proses Surat
+
       </button>
+
     </form>
+
   </div>
 
-  <div id="hasil-area" class="mt-5"></div>
 </div>
+
+
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT UPLOAD PDF -->
+<!-- ========================================== -->
+
+<script>
+
+function tampilkanFile(input) {
+
+    const fileName = document.getElementById('file-name');
+    const fileInfo = document.getElementById('file-info');
+    const uploadIcon = document.getElementById('upload-icon');
+    const uploadBox = document.getElementById('upload-box');
+
+    /*
+     * Jika file sudah dipilih
+     */
+    if (input.files && input.files.length > 0) {
+
+        const file = input.files[0];
+
+
+        /* Nama file */
+        fileName.textContent = file.name;
+
+
+        /* Ukuran file */
+        const ukuranMB = file.size / (1024 * 1024);
+
+        fileInfo.textContent =
+            `PDF • ${ukuranMB.toFixed(2)} MB`;
+
+
+        /* Ganti icon upload menjadi icon PDF */
+        uploadIcon.innerHTML = `
+            <svg
+                class="w-7 h-7 text-primary"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75">
+
+                <path d="M14 2H6a2 2 0 00-2 2v16
+                         a2 2 0 002 2h12
+                         a2 2 0 002-2V8z"/>
+
+                <path d="M14 2v6h6"/>
+
+                <path d="M8 13h2"/>
+
+                <path d="M8 17h6"/>
+
+            </svg>
+        `;
+
+
+        /* Ubah border */
+        uploadBox.classList.add('border-primary');
+
+        uploadBox.classList.remove('border-border');
+
+    }
+
+}
+
+</script>
+
 {% endblock %}

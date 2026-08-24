@@ -26,24 +26,41 @@
       <div class="fl"><label>Kode Klas</label><input type="text" name="kode_klas" value="{{ row.kode_klas }}" class="mono"></div>
       <div class="fl"><label>Retensi Aktif</label><input type="text" name="retensi_aktif" value="{{ row.retensi_aktif }}"></div>
       <div class="fl"><label>Retensi Inaktif</label><input type="text" name="retensi_inaktif" value="{{ row.retensi_inaktif }}"></div>
-      <div class="fl"><label>Keterangan</label><input type="text" name="keterangan_jra" value="{{ row.keterangan_jra }}"></div>
-      <div class="fl"><label>SKKD</label><input type="text" name="skkd" value="{{ row.skkd }}"></div>
+      <div class="fl"><label>Keterangan</label><input type="text" name="keterangan_jra" list="keterangan-options" class="editable-select" value="{{ row.keterangan_jra }}"></div>
+      <div class="fl"><label>SKKD</label><input type="text" name="skkd" list="skkd-options" class="editable-select" value="{{ row.skkd }}"></div>
+      <div class="fl"><label>Klasifikasi Akses</label><input type="text" name="klasifikasi_akses" list="akses-options" class="editable-select" value="{{ row.klasifikasi_akses }}"></div>
+      <div class="fl"><label>Nama File Output</label><input type="text" name="nama_file" value="{{ row.nama_file }}" class="mono"></div>
       <div class="fl">
         <label>TK Perkembangan</label>
-        <select name="tk_perkembangan">
-          <option value="COPY" {% if row.tk_perkembangan == 'COPY' %}selected{% endif %}>COPY</option>
-          <option value="ASLI" {% if row.tk_perkembangan == 'ASLI' %}selected{% endif %}>ASLI</option>
-        </select>
+        <input type="text" name="tk_perkembangan" list="tk-options" class="editable-select" value="{{ row.tk_perkembangan }}" placeholder="Pilih atau ketik manual">
       </div>
       <div class="fl">
         <label>Kondisi Arsip</label>
-        <select name="kondisi_arsip">
-          {% for k in ['BAIK','RUSAK RINGAN','RUSAK BERAT'] %}
-          <option value="{{ k }}" {% if k == row.kondisi_arsip %}selected{% endif %}>{{ k }}</option>
-          {% endfor %}
-        </select>
+        <input type="text" name="kondisi_arsip" list="kondisi-options" class="editable-select" value="{{ row.kondisi_arsip }}" placeholder="Pilih atau ketik manual">
       </div>
     </div>
+
+    <datalist id="keterangan-options">
+      <option value="MUSNAH">
+      <option value="PERMANEN">
+    </datalist>
+    <datalist id="skkd-options">
+      <option value="TERBUKA">
+      <option value="TERTUTUP">
+    </datalist>
+    <datalist id="akses-options">
+      <option value="TERBUKA">
+      <option value="TERTUTUP">
+    </datalist>
+    <datalist id="tk-options">
+      <option value="COPY">
+      <option value="ASLI">
+    </datalist>
+    <datalist id="kondisi-options">
+      <option value="BAIK">
+      <option value="RUSAK RINGAN">
+      <option value="RUSAK BERAT">
+    </datalist>
 
     <div id="edit-hasil"></div>
 

@@ -1,0 +1,69 @@
+{% extends "bidang/base_bidang.html" %}
+{% block title %}Baca Surat — {{ bidang.nama_pendek }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-8 py-8">
+  <div class="mb-6 flex items-center justify-between gap-4">
+    <div>
+      <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">Baca Surat</p>
+      <h1 class="text-[22px] sm:text-[26px] font-extrabold text-ink">Detail Arsip</h1>
+    </div>
+    <a href="/b/{{ bidang_id }}/data"
+      class="shrink-0 text-[12px] font-semibold text-primary hover:text-primary-dark transition-colors">
+      Kembali ke data
+    </a>
+  </div>
+
+  {% if row %}
+  <div class="card p-5 sm:p-6">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-5 mb-5 border-b border-border">
+      <div>
+        <p class="text-[11px] text-muted uppercase tracking-wide mb-1">Nomor Surat</p>
+        <h2 class="text-[18px] font-bold text-ink mono break-all">{{ row.no_surat or '—' }}</h2>
+        <p class="text-[13px] text-muted mt-2">{{ row.uraian_arsip or '—' }}</p>
+      </div>
+      <span class="b-ok shrink-0 self-start">{{ row.kondisi_arsip or 'BAIK' }}</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {% set fields = [
+        ("Nomor Urut", row.nomor, True),
+        ("Tanggal Surat", row.tanggal_surat, True),
+        ("Tahun", row.tahun, True),
+        ("Pengirim", row.pengirim, False),
+        ("Sub Kegiatan", row.sub_kegiatan, False),
+        ("Kode Klas", row.kode_klas, True),
+        ("Retensi Aktif", row.retensi_aktif, False),
+        ("Retensi Inaktif", row.retensi_inaktif, False),
+        ("Keterangan", row.keterangan_jra, False),
+        ("SKKD", row.skkd, False),
+        ("Klasifikasi Akses", row.klasifikasi_akses, False),
+        ("Unit Pengolah", row.unit_pengolah, False),
+        ("TK Perkembangan", row.tk_perkembangan, True),
+        ("Jumlah", row.jumlah, True),
+        ("Kategori Arsip", row.kategori_arsip, False),
+        ("Nama File", row.nama_file, True)
+      ] %}
+      {% for label, value, is_mono in fields %}
+      <div class="bg-surface rounded-lg px-4 py-3">
+        <p class="text-[10px] font-semibold text-muted uppercase tracking-wide mb-1">{{ label }}</p>
+        <p class="text-[13px] {% if is_mono %}font-mono{% endif %} text-ink font-medium break-words">{{ value or '—' }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 pt-5 mt-5 border-t border-border">
+      <a href="/b/{{ bidang_id }}/data/{{ baris }}/edit"
+        class="text-center bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-colors">
+        Edit Data
+      </a>
+      <a href="/b/{{ bidang_id }}/input"
+        class="text-center border border-border hover:border-primary/30 text-ink text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-colors">
+        Input Surat Baru
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div class="card p-8 text-center text-muted text-[13px]">Data surat tidak ditemukan.</div>
+  {% endif %}
+</div>
+{% endblock %}
