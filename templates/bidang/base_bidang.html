@@ -56,7 +56,17 @@ tailwind.config = {
     font-size:13px; color:#0F1E2D; background:white; font-family:inherit; transition:border .15s;
   }
   .fl input:focus, .fl select:focus { outline:none; border-color:#0D6B52; box-shadow:0 0 0 3px rgba(13,107,82,.1); }
+  .fl input.editable-select { padding-right:34px; background-color:white; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235A6A7A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
+  .fl input.editable-select.ai { background-color:#F0FDF4; }
+  .editable-select-wrap { position:relative; }
+  .editable-select-wrap .editable-select { cursor:text; }
+  .editable-select-list { display:none; position:absolute; left:0; right:0; top:calc(100% + 5px); z-index:80; overflow:hidden; background:white; border:1px solid #4B5563; box-shadow:0 4px 8px rgba(0,0,0,.12); }
+  .editable-select-list.open { display:block; }
+  .editable-select-option { padding:8px 24px; color:#0F1E2D; font-size:16px; line-height:1.25; cursor:pointer; white-space:nowrap; }
+  .editable-select-option:hover, .editable-select-option.selected { color:white; background:#808080; }
+  .editable-select-option.hidden { display:none; }
   .fl input.ai { background:#F0FDF4; border-color:#86EFAC; color:#065F46; font-family:'IBM Plex Mono',monospace; }
+  .fl input.ai.editable-select { padding-right:34px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230A5241' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
   .fl label .ab { display:inline-block; font-size:9px; background:#0D6B52; color:white; border-radius:3px; padding:1px 4px; margin-left:4px; font-weight:700; vertical-align:middle; }
 
   /* Badges */
@@ -72,6 +82,11 @@ tailwind.config = {
   #modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:60; align-items:center; justify-content:center; padding:16px; }
   #modal-backdrop.open { display:flex; }
   #modal-content { background:white; border-radius:16px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,.2); }
+  @keyframes success-pop { 0% { transform:scale(.55); opacity:0; } 70% { transform:scale(1.08); opacity:1; } 100% { transform:scale(1); opacity:1; } }
+  @keyframes success-draw { from { stroke-dashoffset:48; } to { stroke-dashoffset:0; } }
+  .success-modal-card { animation:success-pop .42s cubic-bezier(.2,.8,.2,1) both; }
+  .success-check-circle { animation:success-pop .35s ease-out both; }
+  .success-check { stroke-dasharray:48; stroke-dashoffset:48; animation:success-draw .5s .22s ease-out forwards; }
 
   *:focus-visible { outline:2px solid #0D6B52; outline-offset:2px; }
 </style>
@@ -244,7 +259,7 @@ tailwind.config = {
 <script>
 function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
 function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
-function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal-backdrop').classList.add('open'); document.body.style.overflow='hidden'; }
+function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal-backdrop').classList.add('open'); document.body.style.overflow='hidden'; initEditableSelects(); }
 function closeModal(e)  { if(e.target===document.getElementById('modal-backdrop')){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; } }
 function closeModalForce(){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; }
 
@@ -262,8 +277,59 @@ setTimeout(function(){
   }
 }, 4000);
 
+function initEditableSelects() {
+  document.querySelectorAll('.editable-select').forEach(function(input) {
+    if (input.dataset.editableReady) return;
+    const listId = input.getAttribute('list');
+    const datalist = listId && document.getElementById(listId);
+    if (!datalist) return;
+
+    input.dataset.editableReady = 'true';
+    input.removeAttribute('list');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'editable-select-wrap';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const list = document.createElement('div');
+    list.className = 'editable-select-list';
+    Array.from(datalist.options).forEach(function(option) {
+      const item = document.createElement('div');
+      item.className = 'editable-select-option';
+      item.textContent = option.value;
+      item.dataset.value = option.value;
+      item.addEventListener('mousedown', function(event) {
+        event.preventDefault();
+        input.value = item.dataset.value;
+        closeList();
+        input.dispatchEvent(new Event('change', { bubbles:true }));
+      });
+      list.appendChild(item);
+    });
+    wrapper.appendChild(list);
+
+    function refreshList() {
+      const query = input.value.toLowerCase();
+      list.querySelectorAll('.editable-select-option').forEach(function(item) {
+        item.classList.toggle('hidden', query && !item.dataset.value.toLowerCase().includes(query));
+        item.classList.toggle('selected', item.dataset.value === input.value);
+      });
+    }
+    function openList() { refreshList(); list.classList.add('open'); }
+    function closeList() { list.classList.remove('open'); }
+
+    input.addEventListener('focus', openList);
+    input.addEventListener('click', openList);
+    input.addEventListener('input', refreshList);
+    input.addEventListener('blur', function() { setTimeout(closeList, 120); });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initEditableSelects);
+
 // htmx modal target helper
 document.addEventListener('htmx:afterSwap', function(e) {
+  initEditableSelects();
   if(e.detail.target.id==='modal-inner'){
     openModal(document.getElementById('modal-inner').innerHTML);
   }

@@ -1,0 +1,12 @@
+{% extends "bidang/base_bidang.html" %}
+{% block title %}Konfirmasi Surat — {{ bidang.nama_pendek }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-8 py-8">
+  <div class="mb-6">
+    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">Input Otomatis</p>
+    <h1 class="text-[22px] font-extrabold text-ink">Konfirmasi Data Surat</h1>
+    <p class="text-muted text-[13px] mt-1">Periksa hasil pembacaan surat, lalu konfirmasi untuk menyimpannya ke Google Sheets.</p>
+  </div>
+  {% include "bidang/partials/form_konfirmasi.html" %}
+</div>
+{% endblock %}

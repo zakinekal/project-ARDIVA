@@ -7,31 +7,32 @@
       Input Manual</p>
     <h1 class="text-[22px] font-extrabold text-ink">Input Data Tanpa PDF</h1>
     <p class="text-muted text-[13px] mt-1">
-      Isi seluruh kolom secara manual. Field bertanda * wajib diisi.</p>
+      Isi seluruh kolom secara manual. Kolom bertanda <span class="text-red-600 font-bold">*</span> wajib diisi.</p>
   </div>
   <div class="mb-4">
     <a href="/b/{{ bidang_id }}/input"
        class="text-[13px] text-muted hover:text-primary transition-colors">
       ← Kembali ke upload PDF</a>
   </div>
-  <form hx-post="/b/{{ bidang_id }}/input/simpan"
+    <form hx-post="/b/{{ bidang_id }}/input/simpan"
         hx-target="#hasil-simpan" hx-swap="innerHTML"
-        hx-indicator="#spin-manual" class="space-y-4">
+      hx-encoding="multipart/form-data" hx-indicator="#spin-manual" class="space-y-4">
 
     <div class="card p-5">
       <h2 class="text-[14px] font-bold text-ink mb-4">Data Surat</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="fl"><label>No Surat <span class="rq">*</span></label>
+        <div class="fl"><label>No Surat <span class="text-red-600 font-bold">*</span></label>
           <input type="text" name="no_surat" required class="mono"
                  placeholder="400.10.2.1/123/DPMPD-II/2026"></div>
-        <div class="fl"><label>Uraian Arsip / Perihal <span class="rq">*</span></label>
+        <div class="fl"><label>Uraian Arsip / Perihal <span class="text-red-600 font-bold">*</span></label>
           <input type="text" name="uraian_arsip" required
                  placeholder="Isi sesuai perihal surat"></div>
-        <div class="fl"><label>Tanggal Surat (DD/MM/YYYY)</label>
-          <input type="text" name="tanggal_surat" class="mono"
-                 placeholder="05/07/2026"></div>
+        <div class="fl"><label>Tanggal Surat</label>
+          <input type="date" name="tanggal_surat" class="mono"
+                 onchange="document.querySelector('[name=\'tahun\']').value = this.value ? this.value.slice(0, 4) : ''"></div>
         <div class="fl"><label>Tahun</label>
-          <input type="text" name="tahun" class="mono" placeholder="2026"></div>
+          <input type="number" name="tahun" class="mono" placeholder="2026"
+                 min="1900" max="2100" step="1" inputmode="numeric"></div>
         <div class="fl"><label>Pengirim</label>
           <input type="text" name="pengirim"
                  placeholder="Nama instansi pengirim"></div>
@@ -40,6 +41,33 @@
                  placeholder="3 LEMBAR"></div>
       </div>
     </div>
+
+    <datalist id="keterangan-options">
+      <option value="MUSNAH">
+      <option value="PERMANEN">
+    </datalist>
+    <datalist id="skkd-options">
+      <option value="TERBUKA">
+      <option value="TERTUTUP">
+    </datalist>
+    <datalist id="akses-options">
+      <option value="TERBUKA">
+      <option value="TERTUTUP">
+    </datalist>
+    <datalist id="tk-options">
+      <option value="COPY">
+      <option value="ASLI">
+    </datalist>
+    <datalist id="kondisi-options">
+      <option value="BAIK">
+      <option value="RUSAK RINGAN">
+      <option value="RUSAK BERAT">
+    </datalist>
+    <datalist id="kategori-options">
+      <option value="Surat Keluar">
+      <option value="Surat Masuk">
+      <option value="Musnah">
+    </datalist>
 
     <div class="card p-5">
       <h2 class="text-[14px] font-bold text-ink mb-4">Klasifikasi Arsip</h2>
@@ -60,11 +88,11 @@
           <input type="text" name="retensi_inaktif"
                  placeholder="Contoh: 3 Tahun"></div>
         <div class="fl"><label>Keterangan</label>
-          <input type="text" name="keterangan_jra"
-                 placeholder="MUSNAH / PERMANEN"></div>
+          <input type="text" name="keterangan_jra" list="keterangan-options" class="editable-select" value="MUSNAH" placeholder="Pilih atau ketik manual"></div>
         <div class="fl"><label>SKKD</label>
-          <input type="text" name="skkd"
-                 placeholder="TERBUKA / TERTUTUP"></div>
+          <input type="text" name="skkd" list="skkd-options" class="editable-select" value="TERBUKA" placeholder="Pilih atau ketik manual"></div>
+        <div class="fl"><label>Klasifikasi Akses</label>
+          <input type="text" name="klasifikasi_akses" list="akses-options" class="editable-select" value="TERBUKA" placeholder="Pilih atau ketik manual"></div>
       </div>
     </div>
 
@@ -72,26 +100,32 @@
       <h2 class="text-[14px] font-bold text-ink mb-4">Detail Penyimpanan</h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="fl"><label>TK Perkembangan</label>
-          <select name="tk_perkembangan">
-            <option value="COPY">COPY</option>
-            <option value="ASLI">ASLI</option>
-          </select></div>
+          <input type="text" name="tk_perkembangan" list="tk-options" class="editable-select" value="COPY" placeholder="Pilih atau ketik manual"></div>
         <div class="fl"><label>Kondisi Arsip</label>
-          <select name="kondisi_arsip">
-            <option value="BAIK">BAIK</option>
-            <option value="RUSAK RINGAN">RUSAK RINGAN</option>
-            <option value="RUSAK BERAT">RUSAK BERAT</option>
-          </select></div>
+          <input type="text" name="kondisi_arsip" list="kondisi-options" class="editable-select" value="BAIK" placeholder="Pilih atau ketik manual"></div>
         <div class="fl"><label>Kategori Arsip</label>
-          <select name="kategori_arsip">
-            <option value="Surat Keluar">Surat Keluar</option>
-            <option value="Surat Masuk">Surat Masuk</option>
-            <option value="Musnah">Musnah</option>
-          </select></div>
+          <input type="text" name="kategori_arsip" list="kategori-options" class="editable-select" value="Surat Keluar" placeholder="Pilih atau ketik manual"></div>
       </div>
     </div>
 
-    <input type="hidden" name="nama_file_pdf" value="INPUT_MANUAL">
+    <div class="card p-5">
+      <h2 class="text-[14px] font-bold text-ink mb-4">Input/Masukkan File <span class="text-red-600 font-bold">*</span></h2>
+      <label for="file-manual"
+        class="flex flex-col items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-border
+               bg-surface-alt/50 px-6 py-8 text-center cursor-pointer
+               hover:border-primary/40 hover:bg-primary/[0.03] transition-colors">
+        <svg class="w-8 h-8 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+        <span id="manual-picker-title" class="text-[13px] font-semibold text-ink">Klik untuk memilih file</span>
+        <span id="manual-picker-subtitle" class="text-[11.5px] text-muted">Nama file akan disimpan ke kolom nama_file</span>
+        <input id="file-manual" type="file" name="nama_file" accept=".pdf" required class="hidden"
+          onchange="tampilkanFileManual(this)">
+      </label>
+      <p id="manual-file-name" class="text-[12.5px] text-muted mt-2.5 pl-1">Belum ada file dipilih</p>
+      <p class="text-[12px] font-semibold text-red-600 mt-1 pl-1">File PDF wajib diisi.</p>
+    </div>
+
     <input type="hidden" name="force" value="false">
 
     <div class="flex flex-col sm:flex-row items-start gap-3">
@@ -111,4 +145,16 @@
     </div>
   </form>
 </div>
+
+<script>
+function tampilkanFileManual(input) {
+  const namaFile = input.files[0]?.name || '';
+  document.getElementById('manual-picker-title').textContent = namaFile || 'Klik untuk memilih file';
+  document.getElementById('manual-picker-subtitle').textContent = namaFile
+    ? 'File siap diinput dan nama file akan disimpan ke spreadsheet'
+    : 'Nama file akan disimpan ke kolom nama_file';
+  document.getElementById('manual-file-name').textContent = namaFile || 'Belum ada file dipilih';
+}
+</script>
+
 {% endblock %}

@@ -6,6 +6,7 @@ URL pattern: /b/{bidang_id}/...
 
 import os
 import tempfile
+from datetime import datetime
 from fastapi import APIRouter, Request, UploadFile, File, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from starlette.concurrency import run_in_threadpool
@@ -84,7 +85,9 @@ async def input_page(request: Request, bidang_id: str):
     return templates.TemplateResponse(
         "bidang/input.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
-             active_page="input")
+             active_page="input",
+             save_success=request.query_params.get("status") == "success",
+             saved_nomor=request.query_params.get("nomor", ""))
     )
 
 @router.get("/input/manual")
@@ -130,9 +133,8 @@ async def input_proses(request: Request, bidang_id: str, file: UploadFile = File
 
     kode_dari_nomor = data.get("kode_klas", "")
     kandidat_kode = _kandidat_kode(matcher, teks_klas, sub_terpilih, kode_dari_nomor)
-
     return templates.TemplateResponse(
-        "bidang/partials/form_konfirmasi.html",
+        "bidang/konfirmasi.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
              data=data,
              sub_list=sub_list,
@@ -171,12 +173,54 @@ async def input_simpan(request: Request, bidang_id: str):
 
     form = await request.form()
     row  = dict(form)
+    file_input = row.get("nama_file")
+    nama_file = getattr(file_input, "filename", None)
+    if nama_file is not None:
+        row["nama_file"] = nama_file or ""
+    if not row.get("no_surat", "").strip() or not row.get("uraian_arsip", "").strip():
+        return templates.TemplateResponse(
+            "bidang/partials/simpan_hasil.html",
+            _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
+                 hasil={
+                     "status": "error",
+                     "message": "No Surat dan Uraian Arsip / Perihal wajib diisi.",
+                 },
+                 row=row)
+        )
+    if row.get("tahun", "").strip() and not row["tahun"].strip().isdigit():
+        return templates.TemplateResponse(
+            "bidang/partials/simpan_hasil.html",
+            _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
+                 hasil={
+                     "status": "error",
+                     "message": "Tahun hanya boleh diisi dengan angka.",
+                 },
+                 row=row)
+        )
+    if row.get("tanggal_surat"):
+        try:
+            row["tanggal_surat"] = datetime.strptime(
+                row["tanggal_surat"], "%Y-%m-%d"
+            ).strftime("%d/%m/%Y")
+        except ValueError:
+            pass
     force = row.pop("force", "false") == "true"
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
     unit_pengolah  = ctx["bidang"]["nama"]
 
     row["unit_pengolah"] = unit_pengolah
     hasil = await run_in_threadpool(simpan_arsip, row, spreadsheet_id, force)
+
+    if hasil.get("status") == "success":
+        response = templates.TemplateResponse(
+            "bidang/partials/simpan_hasil.html",
+            _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
+                 hasil=hasil, row=row)
+        )
+        response.headers["HX-Redirect"] = (
+            f"/b/{bidang_id}/input?status=success&nomor={hasil['nomor']}"
+        )
+        return response
 
     return templates.TemplateResponse(
         "bidang/partials/simpan_hasil.html",
@@ -252,6 +296,22 @@ async def data_detail(request: Request, bidang_id: str, baris: int):
     return templates.TemplateResponse(
         "bidang/partials/detail_modal.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"], row=row, baris=baris)
+    )
+
+
+@router.get("/data/{baris}/lihat")
+async def data_lihat(request: Request, bidang_id: str, baris: int):
+    redir, ctx = _cek_akses(request, bidang_id)
+    if redir:
+        return redir
+    spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
+    hasil = await run_in_threadpool(ambil_semua_data, spreadsheet_id)
+    rows = hasil.get("data", [])
+    row = next((r for r in rows if r.get("_baris") == baris), None)
+    return templates.TemplateResponse(
+        "bidang/detail.html",
+        _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
+             active_page="data", row=row, baris=baris)
     )
 
 

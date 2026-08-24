@@ -14,7 +14,7 @@ const HEADERS = [
   "tk_perkembangan", "jumlah", "kondisi_arsip",
   "retensi_aktif", "retensi_inaktif", "keterangan_jra",
   "skkd", "klasifikasi_akses", "unit_pengolah",
-  "kategori_arsip", "nama_file_pdf"
+  "kategori_arsip", "nama_file"
 ];
 
 function doPost(e) {
@@ -75,8 +75,47 @@ function _getOrCreateSheet(ss) {
       .setFontColor("white")
       .setFontWeight("bold");
     sheet.setFrozenRows(1);
+  } else {
+    var headerMap = _headerMap(sheet);
+    if (!headerMap.nama_file) {
+      var namaFileCol = sheet.getLastColumn() + 1;
+      sheet.getRange(1, namaFileCol).setValue("NAMA FILE");
+    }
   }
   return sheet;
+}
+
+function _normalisasiHeader(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function _headerMap(sheet) {
+  var lastColumn = Math.max(sheet.getLastColumn(), HEADERS.length);
+  var headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  var aliases = {
+    no_surat: ["nosurat", "nomorsurat"],
+    uraian_arsip: ["uraianarsip", "perihal"],
+    tanggal_surat: ["tanggalsurat", "tanggal"],
+    kode_klas: ["kodeklas", "kodeklasifikasi"],
+    tk_perkembangan: ["tkperkembangan", "tingkatperkembangan"],
+    kondisi_arsip: ["kondisiarsip"],
+    retensi_aktif: ["retensiaktif", "aktif"],
+    retensi_inaktif: ["retensiinaktif", "inaktif"],
+    keterangan_jra: ["keterangan", "keteranganjra"],
+    klasifikasi_akses: ["klasifikasiakses"],
+    unit_pengolah: ["unitpengolah"],
+    kategori_arsip: ["kategoriarsip"],
+    nama_file: ["namafile", "namafilepdf"]
+  };
+  var map = {};
+  headers.forEach(function(header, index) {
+    var normalized = _normalisasiHeader(header);
+    HEADERS.forEach(function(key) {
+      if (normalized === _normalisasiHeader(key)) map[key] = index + 1;
+      if ((aliases[key] || []).indexOf(normalized) >= 0) map[key] = index + 1;
+    });
+  });
+  return map;
 }
 
 // ── Simpan data baru ──────────────────────────────────────────────────────────
@@ -87,19 +126,24 @@ function _simpan(sheet, data, force) {
     if (existing > 0) {
       return _json({
         status: "duplikat",
-        message: "No Surat '" + data.no_surat + "' sudah tersimpan sebelumnya (baris " + existing + ")."
+        no_surat: data.no_surat,
+        baris_lama: existing,
+        message: "Nomor surat ini sudah terdaftar di Google Sheets."
       });
     }
   }
 
   var lastRow = sheet.getLastRow();
   var nomor   = lastRow <= 1 ? 1 : lastRow; // nomor urut
-  var row     = HEADERS.map(function(h) {
-    if (h === "nomor") return nomor;
-    return data[h] || "";
+  var headerMap = _headerMap(sheet);
+  var nextRow = lastRow + 1;
+  var rowValues = Array(sheet.getLastColumn()).fill("");
+  HEADERS.forEach(function(h) {
+    var col = headerMap[h];
+    if (!col) return;
+    rowValues[col - 1] = h === "nomor" ? nomor : (data[h] || "");
   });
-
-  sheet.appendRow(row);
+  sheet.getRange(nextRow, 1, 1, rowValues.length).setValues([rowValues]);
   var newRow = sheet.getLastRow();
   return _json({ status: "success", nomor: nomor, nomor_baris: newRow });
 }
@@ -110,11 +154,16 @@ function _ambilSemua(sheet) {
   if (lastRow <= 1) {
     return _json({ status: "success", data: [] });
   }
-  var values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
-  var result = values.map(function(row, idx) {
-    var obj = { _baris: idx + 2 };
-    HEADERS.forEach(function(h, i) { obj[h] = row[i] !== undefined ? String(row[i]) : ""; });
-    return obj;
+  var headerMap = _headerMap(sheet);
+  var values = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+  var result = [];
+  values.forEach(function(row, index) {
+    var obj = { _baris: index + 2 };
+    HEADERS.forEach(function(h) {
+      var col = headerMap[h];
+      obj[h] = col ? String(row[col - 1] || "") : "";
+    });
+    result.push(obj);
   });
   return _json({ status: "success", data: result });
 }
@@ -124,8 +173,11 @@ function _update(sheet, baris, data) {
   if (!baris || baris < 2) {
     return _json({ status: "error", message: "Nomor baris tidak valid." });
   }
-  var row = HEADERS.map(function(h) { return data[h] !== undefined ? data[h] : ""; });
-  sheet.getRange(baris, 1, 1, HEADERS.length).setValues([row]);
+  var headerMap = _headerMap(sheet);
+  HEADERS.forEach(function(h) {
+    var col = headerMap[h];
+    if (col && data[h] !== undefined) sheet.getRange(baris, col).setValue(data[h]);
+  });
   return _json({ status: "success", baris: baris });
 }
 
@@ -142,7 +194,8 @@ function _hapus(sheet, baris) {
 function _cariNoSurat(sheet, noSurat) {
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return 0;
-  var colIdx  = HEADERS.indexOf("no_surat") + 1;
+  var colIdx  = _headerMap(sheet).no_surat;
+  if (!colIdx) return 0;
   var values  = sheet.getRange(2, colIdx, lastRow - 1, 1).getValues();
   for (var i = 0; i < values.length; i++) {
     if (values[i][0] === noSurat) return i + 2;
