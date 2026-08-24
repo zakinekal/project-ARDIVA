@@ -317,6 +317,8 @@ async def data_page(
              hal=hal, total_hal=total_hal,
              q=q, sub=sub, tahun=tahun,
              sub_list=sub_list, tahun_list=tahun_list,
+             delete_success=request.query_params.get("status") == "deleted",
+             edit_success=request.query_params.get("status") == "edited",
              status=hasil)
     )
 
@@ -382,6 +384,14 @@ async def data_edit_simpan(request: Request, bidang_id: str, baris: int):
     form = dict(await request.form())
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
     hasil = await run_in_threadpool(update_arsip, baris, form, spreadsheet_id)
+    if hasil.get("status") == "success":
+        response = templates.TemplateResponse(
+            "bidang/partials/edit_hasil.html",
+            _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
+                 hasil=hasil, baris=baris)
+        )
+        response.headers["HX-Redirect"] = f"/b/{bidang_id}/data?status=edited"
+        return response
     return templates.TemplateResponse(
         "bidang/partials/edit_hasil.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
@@ -415,6 +425,13 @@ async def hapus_eksekusi(request: Request, bidang_id: str, baris: int):
         return redir
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
     hasil = await run_in_threadpool(hapus_arsip, baris, spreadsheet_id)
+    if hasil.get("status") == "success":
+        response = templates.TemplateResponse(
+            "bidang/partials/hapus_hasil.html",
+            _ctx(request, bidang_id, ctx["user"], ctx["bidang"], hasil=hasil)
+        )
+        response.headers["HX-Redirect"] = f"/b/{bidang_id}/data?status=deleted"
+        return response
     return templates.TemplateResponse(
         "bidang/partials/hapus_hasil.html",
         _ctx(request, bidang_id, ctx["user"], ctx["bidang"],
