@@ -244,7 +244,12 @@ tailwind.config = {
 <script>
 function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
 function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
-function openModal(html){ document.getElementById('modal-content').innerHTML=html; document.getElementById('modal-backdrop').classList.add('open'); document.body.style.overflow='hidden'; }
+function openModal(html){
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow='hidden';
+  if (window.htmx) { htmx.process(document.getElementById('modal-content')); }
+}
 function closeModal(e)  { if(e.target===document.getElementById('modal-backdrop')){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; } }
 function closeModalForce(){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; }
 

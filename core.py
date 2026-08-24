@@ -4,6 +4,7 @@ Utilitas bersama: template engine, session helper, matcher loader.
 """
 
 import os
+import re
 from functools import lru_cache
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
@@ -80,3 +81,23 @@ def get_matcher():
     SKKD_PATH  = os.path.join(DATA_DIR, "lampiran_iii_skkd.json")
     KAMUS_PATH = os.path.join(DATA_DIR, "kamus_istilah_pencocokan.xlsx")
     return KlasifikasiMatcher(JRA_PATH, SKKD_PATH, KAMUS_PATH)
+
+
+# ── Filter format tanggal ─────────────────────────────────────────────────
+_BULAN_ID = {
+    "Jan": "Januari", "Feb": "Februari", "Mar": "Maret", "Apr": "April",
+    "May": "Mei", "Jun": "Juni", "Jul": "Juli", "Aug": "Agustus",
+    "Sep": "September", "Oct": "Oktober", "Nov": "November", "Dec": "Desember",
+}
+
+def format_tanggal(value):
+    """Ubah 'Fri Jul 03 2026 00:00:00 GMT+0800 (...)' -> '03 Juli 2026'."""
+    if not value:
+        return ""
+    m = re.match(r"\w+ (\w+) (\d+) (\d+)", str(value))
+    if not m:
+        return value
+    bln, tgl, thn = m.groups()
+    return f"{int(tgl):02d} {_BULAN_ID.get(bln, bln)} {thn}"
+
+templates.env.filters["tgl"] = format_tanggal

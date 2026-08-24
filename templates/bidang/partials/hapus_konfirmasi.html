@@ -17,10 +17,14 @@
 
   <div id="hapus-hasil"></div>
 
-  <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/hapus" hx-target="#hapus-hasil" hx-swap="innerHTML">
+  <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/hapus" hx-target="#hapus-hasil" hx-swap="innerHTML" hx-indicator="#spin-hapus">
     <div class="flex gap-3">
       <button type="submit"
-        class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+        class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors inline-flex items-center justify-center gap-2">
+        <svg id="spin-hapus" class="htmx-indicator animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+        </svg>
         Ya, hapus data ini
       </button>
       <button type="button" onclick="closeModalForce()"
