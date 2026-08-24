@@ -17,13 +17,13 @@
     <p class="text-[11px] text-muted mb-4">Nomor urut ditentukan otomatis saat disimpan.</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div class="fl">
-        <label>No Surat</label>
+        <label>No Surat <span class="text-red-600 font-bold">*</span></label>
         <input type="text" name="no_surat" value="{{ data.no_surat }}" class="mono">
         {% if data.no_surat == "TIDAK ADA NOMOR" or not data.no_surat %}
         <p class="text-[11px] text-amber-600 mt-1">Tidak terbaca — isi manual.</p>
         {% endif %}
       </div>
-      <div class="fl"><label>Uraian Arsip / Perihal</label><input type="text" name="uraian_arsip" value="{{ data.uraian_arsip }}"></div>
+      <div class="fl"><label>Uraian Arsip / Perihal <span class="text-red-600 font-bold">*</span></label><input type="text" name="uraian_arsip" value="{{ data.uraian_arsip }}"></div>
       <div class="fl"><label>Tanggal Surat (DD/MM/YYYY)</label><input type="text" name="tanggal_surat" value="{{ data.tanggal_surat }}" class="mono"></div>
       <div class="fl"><label>Tahun</label><input type="text" name="tahun" value="{{ data.tanggal_surat.split('/')[-1] if '/' in (data.tanggal_surat or '') else '' }}" class="mono"></div>
       <div class="fl"><label>Pengirim</label><input type="text" name="pengirim" value="{{ data.pengirim }}"></div>
@@ -57,31 +57,46 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="fl">
         <label>TK Perkembangan</label>
-        <select name="tk_perkembangan">
-          <option value="COPY" selected>COPY</option>
-          <option value="ASLI">ASLI</option>
-        </select>
+        <input type="text" name="tk_perkembangan" list="tk-options" class="editable-select" value="COPY" placeholder="Pilih atau ketik manual">
       </div>
       <div class="fl">
         <label>Kondisi Arsip</label>
-        <select name="kondisi_arsip">
-          <option value="BAIK">BAIK</option>
-          <option value="RUSAK RINGAN">RUSAK RINGAN</option>
-          <option value="RUSAK BERAT">RUSAK BERAT</option>
-        </select>
+        <input type="text" name="kondisi_arsip" list="kondisi-options" class="editable-select" value="BAIK" placeholder="Pilih atau ketik manual">
       </div>
       <div class="fl">
         <label>Kategori Arsip</label>
-        <select name="kategori_arsip">
-          <option value="Surat Keluar">Surat Keluar</option>
-          <option value="Surat Masuk">Surat Masuk</option>
-          <option value="Musnah">Musnah</option>
-        </select>
+        <input type="text" name="kategori_arsip" list="kategori-options" class="editable-select" value="Surat Keluar" placeholder="Pilih atau ketik manual">
       </div>
     </div>
   </div>
 
-  <input type="hidden" name="nama_file_pdf" value="{{ nama_file }}">
+  <datalist id="keterangan-options">
+    <option value="MUSNAH">
+    <option value="PERMANEN">
+  </datalist>
+  <datalist id="skkd-options">
+    <option value="TERBUKA">
+    <option value="TERTUTUP">
+  </datalist>
+  <datalist id="akses-options">
+    <option value="TERBUKA">
+    <option value="TERTUTUP">
+  </datalist>
+  <datalist id="tk-options">
+    <option value="COPY">
+    <option value="ASLI">
+  </datalist>
+  <datalist id="kondisi-options">
+    <option value="BAIK">
+    <option value="RUSAK RINGAN">
+    <option value="RUSAK BERAT">
+  </datalist>
+  <datalist id="kategori-options">
+    <option value="Surat Keluar">
+    <option value="Surat Masuk">
+    <option value="Musnah">
+  </datalist>
+
   <input type="hidden" name="force" value="false">
 
   <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">

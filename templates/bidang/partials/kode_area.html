@@ -43,20 +43,15 @@
     </div>
     <div class="fl">
       <label>Keterangan <span class="ab">PERGUB</span></label>
-      <input type="text" name="keterangan" id="f_ket" value="{{ kandidat_kode[0].keterangan if kandidat_kode else '' }}" class="ai">
-      <input type="hidden" name="keterangan_jra" value="{{ kandidat_kode[0].keterangan if kandidat_kode else '' }}">
+      <input type="text" name="keterangan_jra" id="f_ket" list="keterangan-options" value="{{ kandidat_kode[0].keterangan if kandidat_kode else '' }}" class="ai editable-select">
     </div>
     <div class="fl">
       <label>SKKD <span class="ab">PERGUB</span></label>
-      <input type="text" name="skkd" id="f_keamanan" value="{{ kandidat_kode[0].klasifikasi_keamanan if kandidat_kode else '' }}" class="ai">
+      <input type="text" name="skkd" id="f_keamanan" list="skkd-options" value="{{ kandidat_kode[0].klasifikasi_keamanan if kandidat_kode else '' }}" class="ai editable-select">
     </div>
     <div class="fl">
       <label>Klasifikasi Akses <span class="ab">PERGUB</span></label>
-      <input type="text" name="klasifikasi_akses" id="f_akses" value="{{ kandidat_kode[0].klasifikasi_akses if kandidat_kode else '' }}" class="ai">
-    </div>
-    <div class="fl sm:col-span-2">
-      <label>Unit Pengolah</label>
-      <input type="text" name="unit_pengolah" id="f_unit" value="{{ kandidat_kode[0].unit_pengolah if kandidat_kode else '' }}">
+      <input type="text" name="klasifikasi_akses" id="f_akses" list="akses-options" value="{{ kandidat_kode[0].klasifikasi_akses if kandidat_kode else '' }}" class="ai editable-select">
     </div>
   </div>
 </div>
