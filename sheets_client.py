@@ -7,7 +7,9 @@ Setiap fungsi menerima spreadsheet_id untuk menentukan bidang tujuan.
 import requests
 from config import APPS_SCRIPT_URL, SECRET_TOKEN
 
-TIMEOUT = (5, 20)
+# PEMDES memiliki ratusan baris; Apps Script dapat membutuhkan waktu lebih
+# lama saat membaca seluruh sheet, terutama setelah lama tidak dipanggil.
+TIMEOUT = (5, 180)
 
 
 def _post(payload: dict) -> dict:
