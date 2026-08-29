@@ -2,17 +2,146 @@
 """
 baca_surat.py
 Ekstraksi data mentah (No Surat, Tanggal, Pengirim, Kode Klas, Uraian) dari file PDF surat masuk.
-Hanya baca teks digital (belum termasuk OCR untuk surat hasil scan - lihat catatan di README).
+Support untuk PDF digital dan PDF hasil scan (OCR otomatis).
 """
 import os
 import re
 from datetime import datetime
 import pdfplumber
+import cv2
+import numpy as np
+from PIL import Image
+import io
+import logging
+
+# Setup logging
+logger = logging.getLogger(__name__)
+
+# Lazy load OCR reader (load hanya saat diperlukan)
+_ocr_reader = None
+
+def _get_ocr_reader():
+    """Lazy load EasyOCR reader untuk bahasa Indonesia."""
+    global _ocr_reader
+    if _ocr_reader is None:
+        try:
+            import easyocr
+            logger.info("Loading EasyOCR model for Indonesian language...")
+            _ocr_reader = easyocr.Reader(['id'], gpu=False)
+        except ImportError:
+            logger.error("EasyOCR not installed. Install with: pip install easyocr")
+            return None
+    return _ocr_reader
 
 MONTHS = {
     "januari": 1, "februari": 2, "maret": 3, "april": 4, "mei": 5, "juni": 6,
     "juli": 7, "agustus": 8, "september": 9, "oktober": 10, "november": 11, "desember": 12,
 }
+
+# ---------------------------------------------------------------------------
+# LAPISAN 0: Deteksi dan OCR untuk surat hasil scan
+#
+# Jika PDF tidak memiliki text layer (hasil scan), sistem akan:
+# 1. Ekstrak setiap halaman sebagai gambar
+# 2. Lakukan preprocessing gambar (kontras, brightness)
+# 3. Gunakan EasyOCR untuk ekstrak teks
+# 4. Gabungkan teks dari semua halaman
+# ---------------------------------------------------------------------------
+
+def _has_text_layer(pdf_path):
+    """
+    Deteksi apakah PDF memiliki text layer (teks digital).
+    Return True jika text tersedia, False jika hanya gambar (scan).
+    """
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            for halaman in pdf.pages:
+                # Jika ada character objects dengan 'size' > 0, berarti ada text layer
+                if halaman.chars:
+                    teks = halaman.extract_text()
+                    if teks and len(teks.strip()) > 50:  # threshold minimal teks
+                        return True
+        return False
+    except Exception as e:
+        logger.warning(f"Error saat deteksi text layer: {e}")
+        return False
+
+
+def _preprocess_image(image_cv):
+    """
+    Preprocessing gambar untuk meningkatkan kualitas OCR:
+    - Grayscale conversion
+    - Contrast/brightness adjustment
+    - Denoising
+    """
+    try:
+        # Convert ke grayscale jika masih color
+        if len(image_cv.shape) == 3:
+            gray = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image_cv
+        
+        # Improve contrast dengan CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(gray)
+        
+        # Denoise
+        denoised = cv2.fastNlMeansDenoising(enhanced, None, h=10, templateWindowSize=7, searchWindowSize=21)
+        
+        return denoised
+    except Exception as e:
+        logger.warning(f"Error preprocessing image: {e}")
+        return image_cv if len(image_cv.shape) == 2 else cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+
+
+def _extract_text_via_ocr(pdf_path):
+    """
+    Ekstrak teks dari PDF scan menggunakan EasyOCR.
+    Return tuple (teks_lengkap, jumlah_halaman).
+    """
+    try:
+        reader = _get_ocr_reader()
+        if reader is None:
+            return "", 0
+        
+        teks_semua_halaman = []
+        halaman_count = 0
+        
+        with pdfplumber.open(pdf_path) as pdf:
+            halaman_count = len(pdf.pages)
+            
+            for idx, halaman in enumerate(pdf.pages):
+                logger.info(f"OCR processing halaman {idx + 1}/{halaman_count}...")
+                
+                # Convert halaman PDF ke image
+                try:
+                    image = halaman.to_image(resolution=300)
+                    image_np = np.array(image)
+                    
+                    # Preprocessing
+                    image_processed = _preprocess_image(image_np)
+                    
+                    # OCR
+                    results = reader.readtext(image_processed, detail=0)  # detail=0 untuk hanya teks
+                    
+                    # Gabungkan baris
+                    if results:
+                        teks_halaman = "\n".join(results)
+                        teks_semua_halaman.append(teks_halaman)
+                        logger.info(f"Halaman {idx + 1} OCR berhasil, {len(results)} baris teks ditemukan")
+                    else:
+                        logger.warning(f"Halaman {idx + 1} tidak ada teks yang terdeteksi")
+                        
+                except Exception as e:
+                    logger.error(f"Error OCR halaman {idx + 1}: {e}")
+                    continue
+        
+        teks_lengkap = "\n".join(teks_semua_halaman).strip()
+        return teks_lengkap, halaman_count
+        
+    except Exception as e:
+        logger.error(f"Error extract text via OCR: {e}")
+        return "", 0
 
 # ---------------------------------------------------------------------------
 # LAPISAN 1: pembersih artefak template merge-field (mis. e-sign/DOCX->PDF)
@@ -85,7 +214,16 @@ def _bersihkan_karakter_placeholder(chars):
 
 
 def extract_text_from_pdf(path_pdf):
+    """
+    Ekstrak teks dari PDF dengan deteksi otomatis:
+    - Coba baca teks digital dulu (fast path)
+    - Jika gagal atau minimal, fallback ke OCR (slow path)
+    
+    Return tuple (teks, halaman_count).
+    """
     teks, halaman_count = [], 0
+    butuh_ocr = False
+    
     try:
         with pdfplumber.open(path_pdf) as pdf:
             halaman_count = len(pdf.pages)
@@ -105,8 +243,23 @@ def extract_text_from_pdf(path_pdf):
                 if halaman_teks:
                     teks.append(halaman_teks)
     except Exception as e:
-        print(f"[ERROR EXTRACT PDF]: {e}")
-    return "\n".join(teks).strip(), halaman_count
+        logger.warning(f"Error extracting digital text from PDF: {e}")
+        butuh_ocr = True
+    
+    teks_hasil = "\n".join(teks).strip()
+    
+    # Jika teks sangat minimal (< 100 karakter), kemungkinan hasil scan
+    if len(teks_hasil) < 100:
+        logger.info("Teks minimal terdeteksi, mencoba OCR...")
+        butuh_ocr = True
+        teks_ocr, halaman_count = _extract_text_via_ocr(path_pdf)
+        if teks_ocr:
+            teks_hasil = teks_ocr
+            butuh_ocr = False
+        else:
+            butuh_ocr = True
+    
+    return teks_hasil, halaman_count, butuh_ocr
 
 
 # ---------------------------------------------------------------------------
@@ -508,12 +661,15 @@ def find_jumlah(text, pages):
 
 def ekstrak_surat(path_pdf):
     """Ekstrak semua field mentah dari satu file PDF surat masuk."""
-    text, pages = extract_text_from_pdf(path_pdf)
+    text, pages, butuh_ocr = extract_text_from_pdf(path_pdf)
     if not text:
+        pesan_error = "Gagal ekstrak teks"
+        if butuh_ocr:
+            pesan_error += " - OCR diperlukan tapi model tidak tersedia/gagal"
         return {
             "no_surat": "TIDAK ADA NOMOR", "tanggal_surat": "", "pengirim": "",
-            "perihal": "", "uraian_arsip": "Tidak dapat mengekstrak teks - kemungkinan hasil scan/gambar.",
-            "jumlah": str(pages or ""), "kode_klas": "", "teks_lengkap": "", "butuh_ocr": True,
+            "perihal": "", "uraian_arsip": pesan_error,
+            "jumlah": str(pages or ""), "kode_klas": "", "teks_lengkap": "", "butuh_ocr": butuh_ocr,
         }
     no_surat = find_no_surat(text)
     perihal = find_perihal(text)
@@ -526,5 +682,5 @@ def ekstrak_surat(path_pdf):
         "jumlah": find_jumlah(text, pages),
         "kode_klas": find_kode_klas(no_surat, text),
         "teks_lengkap": text,
-        "butuh_ocr": False,
+        "butuh_ocr": butuh_ocr,
     }

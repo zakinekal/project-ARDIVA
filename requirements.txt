@@ -10,3 +10,7 @@ authlib
 httpx
 itsdangerous
 python-dotenv
+easyocr
+opencv-python
+Pillow
+numpy
