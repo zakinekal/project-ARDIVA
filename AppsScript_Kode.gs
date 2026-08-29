@@ -143,6 +143,8 @@ function _simpan(sheet, data, force) {
     if (!col) return;
     rowValues[col - 1] = h === "nomor" ? nomor : (data[h] || "");
   });
+  var kodeKlasCol = headerMap.kode_klas;
+  if (kodeKlasCol) sheet.getRange(nextRow, kodeKlasCol).setNumberFormat("@");
   sheet.getRange(nextRow, 1, 1, rowValues.length).setValues([rowValues]);
   var newRow = sheet.getLastRow();
   return _json({ status: "success", nomor: nomor, nomor_baris: newRow });
@@ -174,6 +176,7 @@ function _update(sheet, baris, data) {
     return _json({ status: "error", message: "Nomor baris tidak valid." });
   }
   var headerMap = _headerMap(sheet);
+  if (headerMap.kode_klas) sheet.getRange(baris, headerMap.kode_klas).setNumberFormat("@");
   HEADERS.forEach(function(h) {
     var col = headerMap[h];
     if (col && data[h] !== undefined) sheet.getRange(baris, col).setValue(data[h]);

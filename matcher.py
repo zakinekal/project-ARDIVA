@@ -43,6 +43,11 @@ class KlasifikasiMatcher:
                     terms.add(term)
             self.sub_kegiatan_terms[label] = terms
 
+    @staticmethod
+    def _retensi_tahun(value):
+        match = re.search(r"(\d+)\s*tahun", str(value or ""), re.IGNORECASE)
+        return f"{match.group(1)} TAHUN" if match else ""
+
     def classify_sub_kegiatan(self, text, top_n=3):
         """
         Tebak Sub Kegiatan (dari 10 pilihan tetap) berdasarkan kecocokan kata kunci.
@@ -95,8 +100,8 @@ class KlasifikasiMatcher:
         return {
             "kode_klasifikasi": kode,
             "jenis_series_arsip": self.docs_original.get(kode, ""),
-            "retensi_aktif": j["retensi_aktif"] if j else "",
-            "retensi_inaktif": j["retensi_inaktif"] if j else "",
+            "retensi_aktif": self._retensi_tahun(j["retensi_aktif"] if j else ""),
+            "retensi_inaktif": self._retensi_tahun(j["retensi_inaktif"] if j else ""),
             "keterangan": j["keterangan"] if j else "",
             "klasifikasi_keamanan": s["klasifikasi_keamanan"] if s else "",
             "klasifikasi_akses": s["klasifikasi_akses"] if s else "",

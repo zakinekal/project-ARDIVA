@@ -14,6 +14,75 @@ MONTHS = {
     "juli": 7, "agustus": 8, "september": 9, "oktober": 10, "november": 11, "desember": 12,
 }
 
+# ---------------------------------------------------------------------------
+# LAPISAN 1: pembersih artefak template merge-field (mis. e-sign/DOCX->PDF)
+#
+# Beberapa sistem persuratan (khususnya hasil e-sign) menghasilkan PDF di mana
+# nilai asli field dinamis (tanggal, nomor surat, sifat, dst.) dirender TEPAT
+# di posisi yang sama dengan placeholder mentahnya yang belum ter-replace,
+# mis. "${tanggal_naskah}", hanya beda font/layer. pdfplumber mengurutkan
+# karakter satu baris murni berdasarkan posisi X, sehingga dua string yang
+# bertumpuk itu ke-interleave karakter-per-karakter dan jadi teks acak
+# (mis. "Samarinda, $1{5t aJnuglig 2a0l_2n6askah}").
+#
+# Strategi: kelompokkan karakter per baris (toleransi posisi Y), lalu per
+# font dalam baris yang sama. Kalau teks salah satu font-run di baris itu
+# cocok pola "${nama_variabel}", buang HANYA span karakter placeholder itu
+# (bukan seluruh baris/font), sisanya (nilai asli + teks statis lain di
+# baris yang sama) dibiarkan utuh sehingga baris tetap bisa direkonstruksi
+# secara normal oleh pdfplumber setelahnya.
+# ---------------------------------------------------------------------------
+
+_POLA_PLACEHOLDER = re.compile(r"\$\{[A-Za-z_][A-Za-z0-9_]*\}")
+
+
+def _kelompokkan_baris(chars, toleransi=2.5):
+    """Kelompokkan karakter yang posisi 'top'-nya berdekatan jadi satu baris kasar."""
+    chars_terurut = sorted(chars, key=lambda c: c["top"])
+    baris_list = []
+    for c in chars_terurut:
+        ditempatkan = False
+        for baris in baris_list:
+            if abs(baris[0]["top"] - c["top"]) <= toleransi:
+                baris.append(c)
+                ditempatkan = True
+                break
+        if not ditempatkan:
+            baris_list.append([c])
+    return baris_list
+
+
+def _bersihkan_karakter_placeholder(chars):
+    """
+    Dari seluruh karakter satu halaman, kembalikan daftar karakter dengan
+    span '${...}' yang bertumpuk di baris yang sama dengan konten lain
+    sudah dibuang. Aman dipanggil pada halaman tanpa masalah ini sekalipun
+    (tidak akan mengubah apa-apa jika tidak ada tumpang tindih font).
+    """
+    id_dibuang = set()
+    for baris in _kelompokkan_baris(chars):
+        per_font = {}
+        for c in baris:
+            per_font.setdefault(c["fontname"], []).append(c)
+        if len(per_font) < 2:
+            continue  # baris normal, cuma 1 layer font -> tidak mungkin tumpang tindih
+        for font, fchars in per_font.items():
+            fchars_terurut = sorted(fchars, key=lambda c: c["x0"])
+            # Guard: kalau ada unit karakter multi-huruf (ligature dsb.),
+            # index string tidak 1:1 dengan index list -> lewati span-removal
+            # halus, buang seluruh font-run ini saja demi keamanan jika
+            # run itu murni placeholder (tidak ada teks lain tercampur).
+            multi_char = any(len(c["text"]) != 1 for c in fchars_terurut)
+            teks = "".join(c["text"] for c in fchars_terurut)
+            if multi_char:
+                if _POLA_PLACEHOLDER.fullmatch(teks.strip()):
+                    id_dibuang.update(id(c) for c in fchars_terurut)
+                continue
+            for m in _POLA_PLACEHOLDER.finditer(teks):
+                for c in fchars_terurut[m.start():m.end()]:
+                    id_dibuang.add(id(c))
+    return [c for c in chars if id(c) not in id_dibuang]
+
 
 def extract_text_from_pdf(path_pdf):
     teks, halaman_count = [], 0
@@ -21,12 +90,42 @@ def extract_text_from_pdf(path_pdf):
         with pdfplumber.open(path_pdf) as pdf:
             halaman_count = len(pdf.pages)
             for halaman in pdf.pages:
-                halaman_teks = halaman.extract_text()
+                chars_asli = halaman.chars
+                # Fast path: kalau tidak ada indikasi placeholder mentah sama
+                # sekali di halaman ini, tidak perlu proses tambahan.
+                if not any(c["text"] == "$" for c in chars_asli):
+                    halaman_teks = halaman.extract_text()
+                else:
+                    chars_bersih = _bersihkan_karakter_placeholder(chars_asli)
+                    id_simpan = {id(c) for c in chars_bersih}
+                    halaman_bersih = halaman.filter(
+                        lambda obj: obj.get("object_type") != "char" or id(obj) in id_simpan
+                    )
+                    halaman_teks = halaman_bersih.extract_text()
                 if halaman_teks:
                     teks.append(halaman_teks)
     except Exception as e:
         print(f"[ERROR EXTRACT PDF]: {e}")
     return "\n".join(teks).strip(), halaman_count
+
+
+# ---------------------------------------------------------------------------
+# LAPISAN 2: sanitasi terakhir pada nilai field hasil parsing.
+#
+# Jaring pengaman kalau suatu saat ada pola korupsi lain (font tak dikenal,
+# placeholder dengan sintaks beda, dsb.) yang lolos dari Lapisan 1: setiap
+# field akhir tetap disaring dari sisa karakter '$ { }' dan spasi ganda yang
+# tidak wajar sebelum dikembalikan ke caller.
+# ---------------------------------------------------------------------------
+
+def _sanitasi_field(value):
+    if not value:
+        return value
+    if re.search(r"\$\{|\}", value):
+        value = re.sub(r"\$\{[^}]*\}?", "", value)
+        value = re.sub(r"[\{\}\$]", "", value)
+    value = re.sub(r"\s{2,}", " ", value).strip()
+    return value
 
 
 def normalize_date(value):
@@ -66,7 +165,12 @@ def clean_text(value):
 def find_no_surat(text):
     lines = text.splitlines()
     for i, line in enumerate(lines):
-        if not re.search(r"\bnomor\b", line, re.IGNORECASE):
+        # Hanya anggap ini baris field "Nomor" kalau kata "Nomor" ada di AWAL
+        # baris (setelah spasi/tab). Ini untuk menghindari salah tangkap kata
+        # "Nomor" yang muncul di tengah kalimat lain, misalnya pada alamat di
+        # kop surat: "Jalan Gajah Mada Nomor 2, Samarinda, ..." - di situ kata
+        # "Nomor" bukan label field, melainkan bagian dari nama jalan.
+        if not re.match(r"^\s*nomor\b", line, re.IGNORECASE):
             continue
 
         m = re.search(r"(?:Nomor\s*(?:Surat)?\s*[:\-]?\s*)(.+)", line, re.IGNORECASE)
@@ -98,18 +202,26 @@ def find_no_surat(text):
 
         if not candidate:
             continue
+        # Nomor surat asli tidak pernah mengandung spasi di tengah kode -
+        # kalau lolos dari Lapisan 1 masih ada spasi nyasar antar
+        # token yang jelas menyambung (huruf/angka|/), rapatkan dulu
+        # sebelum divalidasi, supaya tidak salah terpotong di bawah.
+        candidate_rapat = re.sub(r"(?<=[A-Za-z0-9/.\-])\s+(?=[A-Za-z0-9])", "", candidate)
+        if re.match(r"^[0-9A-Za-z\./\-]+$", candidate_rapat):
+            candidate = candidate_rapat
+
         if " " not in candidate:
-            return candidate
+            return _sanitasi_field(candidate)
         candidate_aman = candidate.split(" ")[0].strip("/.,;:")
         if candidate_aman:
-            return candidate_aman
+            return _sanitasi_field(candidate_aman)
 
     m = re.search(r"\b[0-9]+(?:\.[0-9]+)*/[0-9]+/[A-Za-z0-9\-]+/\d{4}\b", text)
     if m:
-        return clean_text(m.group(0))
+        return _sanitasi_field(clean_text(m.group(0)))
     m = re.search(r"\b[0-9A-Za-z\./\-]+/\d{4}\b", text)
     if m:
-        return clean_text(m.group(0))
+        return _sanitasi_field(clean_text(m.group(0)))
     return "TIDAK ADA NOMOR"
 
 
@@ -216,15 +328,6 @@ def _score_tanggal_candidate(line, is_header=False, is_tail=False):
 
 
 def find_tanggal(text):
-    """
-    Strategi berlapis:
-    1. Pola baku "Kota, tanggal" - di baris manapun.
-    2. Label "Tanggal/Tgl" di kepala surat - sangat penting untuk file hasil scan
-       yang teksnya terpotong atau teracak.
-    3. Tanggal polos tanpa nama kota, HANYA di kepala surat (sebelum Yth./Kepada).
-    4. Blok tanda tangan (25 baris terakhir dokumen).
-    5. Upaya terakhir: seluruh teks, tetap menyaring tanggal berkonteks rujukan.
-    """
     lines = text.splitlines()
 
     hasil = _cari_kota_tanggal(lines)
@@ -308,7 +411,7 @@ def find_tanggal(text):
 def find_pengirim(text):
     m = re.search(r"\b(?:Pengirim|Dari)\b\s*[:\-]\s*(.+?)\n", text, re.IGNORECASE)
     if m:
-        return clean_text(m.group(1))
+        return _sanitasi_field(clean_text(m.group(1)))
 
     def is_non_sender_line(line: str) -> bool:
         if re.search(r"^(surat|nomor|tanggal|lampiran|hal|perihal|kepada|dari|pada|yt[hj]|di\s+tempat|kepala|instansi|desa|bapak|ibu)", line, re.IGNORECASE):
@@ -327,7 +430,7 @@ def find_pengirim(text):
     candidates = [line for line in lines if not is_non_sender_line(line)]
 
     def bersihkan_kurung(line: str) -> str:
-        return clean_text(re.sub(r"\s*\([^)]*\)\s*$", "", line))
+        return _sanitasi_field(clean_text(re.sub(r"\s*\([^)]*\)\s*$", "", line)))
 
     def terlihat_seperti_alamat(line: str) -> bool:
         return bool(re.search(r"\b(jl\.?|jalan|no\.?\s*\d|rt\.?\s*\d|rw\.?\s*\d|kec\.?|kel\.?)\b", line, re.IGNORECASE))
@@ -369,11 +472,11 @@ def find_perihal(text):
             j += 1
             break
 
-        return clean_text(hasil)
+        return _sanitasi_field(clean_text(hasil))
 
     for baris in text.splitlines():
         if re.search(r"\b(?:perihal|hal)\b", baris, re.IGNORECASE):
-            return clean_text(re.sub(r"^(?:perihal|hal)\s*[:\-]?\s*", "", baris, flags=re.IGNORECASE))
+            return _sanitasi_field(clean_text(re.sub(r"^(?:perihal|hal)\s*[:\-]?\s*", "", baris, flags=re.IGNORECASE)))
     return ""
 
 

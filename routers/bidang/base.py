@@ -244,6 +244,7 @@ async def input_simpan(request: Request, bidang_id: str):
             ).strftime("%d/%m/%Y")
         except ValueError:
             pass
+    row["kode_klas"] = (row.get("kode_kelas") or row.get("kode_klas") or "").strip()
     force = row.pop("force", "false") == "true"
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]
     unit_pengolah  = ctx["bidang"]["nama"]
