@@ -11,7 +11,7 @@ Mendukung 5 bidang dengan akses terpisah melalui Google OAuth.
 - **Frontend**: Jinja2 + htmx + Tailwind CSS
 - **Database**: Google Sheets (via Apps Script)
 - **Auth**: Google OAuth 2.0
-- **Hosting**: Railway
+- **Hosting**: Render (Docker)
 
 ---
 
@@ -73,19 +73,21 @@ Berikan akses **Editor** ke akun pemilik Apps Script untuk semua spreadsheet bid
 
 ---
 
-## Deploy ke Railway
+## Deploy ke Render
 
-1. Push kode ke GitHub (repo Public)
-2. Buka [railway.app](https://railway.app) → New Project → Deploy from GitHub
-3. Pilih repo ARDIVA
-4. Di tab **Variables**, tambahkan semua variabel dari `.env`:
+1. Push kode ke GitHub
+2. Buka [render.com](https://render.com) → Sign in with GitHub
+3. Pilih **New +** → **Web Service** → repo ARDIVA
+4. Render otomatis mendeteksi `Dockerfile` di root dan akan menggunakan environment **Docker**
+5. Pilih plan **Free**
+6. Di tab **Environment**, isi variabel dari `.env` seperti:
    - `GOOGLE_CLIENT_ID`
    - `GOOGLE_CLIENT_SECRET`
    - `SECRET_KEY`
    - `APPS_SCRIPT_URL`
    - `SECRET_TOKEN`
-5. Di tab **Settings → Networking**, klik **Generate Domain**
-6. Salin URL Railway ke Authorized Redirect URIs di Google Cloud Console
+7. Setelah service aktif, salin URL Render yang baru dibuat dan tambahkan ke Authorized Redirect URIs di Google Cloud Console
+8. Pastikan juga domain Render dipakai untuk callback login Google, misalnya: `https://<nama-app>.onrender.com/auth/callback`
 
 ---
 

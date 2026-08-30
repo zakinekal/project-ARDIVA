@@ -10,7 +10,14 @@ authlib
 httpx
 itsdangerous
 python-dotenv
-easyocr
-opencv-python
+opencv-python-headless
+pytesseract
+pdf2image
 Pillow
 numpy
+google-auth
+google-auth-oauthlib
+google-api-python-client
+pygments
+pandas
+
