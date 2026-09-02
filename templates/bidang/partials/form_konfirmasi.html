@@ -1,5 +1,9 @@
+<!-- form_konfirmasi.html -->
+
+<div class="h-1 -mx-0 -mt-0 mb-4 rounded-t-2xl" style="background: linear-gradient(90deg,#8A5A22,#D2A662,#8A5A22);"></div>
+
 {% if data.butuh_ocr %}
-<div class="mb-4 flex gap-3 bg-amber-50 border border-amber-200 text-amber-800 text-[13px] px-4 py-3 rounded-xl">
+<div class="mb-4 flex gap-3 bg-gold/10 border border-gold/30 text-gold-dark text-[13px] px-4 py-3 rounded-xl">
   <svg class="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
   Teks tidak terbaca otomatis — isi seluruh form secara manual.
 </div>
@@ -12,18 +16,21 @@
 
 <form hx-post="/b/{{ bidang_id }}/input/simpan" hx-target="#simpan-hasil" hx-swap="innerHTML" hx-indicator="#spin-simpan" class="space-y-4">
 
-  <div class="card p-5">
-    <h2 class="text-[14px] font-bold text-ink mb-1">Ringkasan Surat</h2>
-    <p class="text-[11px] text-muted mb-4">Nomor urut ditentukan otomatis saat disimpan.</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div class="relative card p-5 overflow-hidden">
+    <svg class="absolute -top-6 -right-8 w-28 h-32 text-gold/[0.07] pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+      <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6"/>
+    </svg>
+    <h2 class="relative text-[14px] font-bold text-ink mb-1">Ringkasan Surat</h2>
+    <p class="relative text-[11px] text-muted mb-4">Nomor urut ditentukan otomatis saat disimpan.</p>
+    <div class="relative grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div class="fl">
-        <label>No Surat <span class="text-red-600 font-bold">*</span></label>
+        <label>No Surat <span class="text-garnet font-bold">*</span></label>
         <input type="text" name="no_surat" value="{{ data.no_surat }}" class="mono">
         {% if data.no_surat == "TIDAK ADA NOMOR" or not data.no_surat %}
-        <p class="text-[11px] text-amber-600 mt-1">Tidak terbaca — isi manual.</p>
+        <p class="text-[11px] text-gold-dark mt-1">Tidak terbaca — isi manual.</p>
         {% endif %}
       </div>
-      <div class="fl"><label>Uraian Arsip / Perihal <span class="text-red-600 font-bold">*</span></label><input type="text" name="uraian_arsip" value="{{ data.uraian_arsip }}"></div>
+      <div class="fl"><label>Uraian Arsip / Perihal <span class="text-garnet font-bold">*</span></label><input type="text" name="uraian_arsip" value="{{ data.uraian_arsip }}"></div>
       <div class="fl"><label>Tanggal Surat (DD/MM/YYYY)</label><input type="text" name="tanggal_surat" value="{{ data.tanggal_surat }}" class="mono"></div>
       <div class="fl"><label>Tahun</label><input type="text" name="tahun" value="{{ data.tanggal_surat.split('/')[-1] if '/' in (data.tanggal_surat or '') else '' }}" class="mono"></div>
       <div class="fl"><label>Pengirim</label><input type="text" name="pengirim" value="{{ data.pengirim }}"></div>
@@ -32,12 +39,12 @@
   </div>
 
   <div class="card p-5">
-    <div class="flex items-center gap-2 mb-1">
-      <span class="w-6 h-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shrink-0">1</span>
+    <div class="flex items-center gap-2.5 mb-1">
+      <span class="seal-badge">1</span>
       <h2 class="text-[14px] font-bold text-ink">Konfirmasi Sub Kegiatan</h2>
     </div>
-    <p class="text-[11px] text-muted mb-4 ml-8">Koreksi jika tebakan sistem tidak sesuai.</p>
-    <div class="ml-8 fl">
+    <p class="text-[11px] text-muted mb-4 ml-[30px]">Koreksi jika tebakan sistem tidak sesuai.</p>
+    <div class="ml-[30px] fl">
       <label>Sub Kegiatan</label>
       <select name="sub_kegiatan"
         hx-post="/b/{{ bidang_id }}/input/kandidat" hx-target="#kode-area" hx-swap="innerHTML" hx-trigger="change"
@@ -65,7 +72,7 @@
       </div>
       <div class="fl">
         <label>Kategori Arsip</label>
-        <input type="text" name="kategori_arsip" list="kategori-options" class="editable-select" value="Surat Keluar" placeholder="Pilih atau ketik manual">
+        <input type="text" name="kategori_arsip" list="kategori-options" class="editable-select" value="SURAT KELUAR" placeholder="Pilih atau ketik manual">
       </div>
     </div>
   </div>
@@ -75,10 +82,6 @@
     <option value="PERMANEN">
   </datalist>
   <datalist id="skkd-options">
-    <option value="TERBUKA">
-    <option value="TERTUTUP">
-  </datalist>
-  <datalist id="akses-options">
     <option value="TERBUKA">
     <option value="TERTUTUP">
   </datalist>
@@ -92,16 +95,16 @@
     <option value="RUSAK BERAT">
   </datalist>
   <datalist id="kategori-options">
-    <option value="Surat Keluar">
-    <option value="Surat Masuk">
-    <option value="Musnah">
+    <option value="SURAT KELUAR">
+    <option value="SURAT MASUK">
+    <option value="MUSNAH">
   </datalist>
 
   <input type="hidden" name="force" value="false">
 
   <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
     <button type="submit"
-      class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-6 py-2.5 rounded-lg transition-colors">
+      class="btn-shimmer relative inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-6 py-2.5 rounded-lg transition-colors overflow-hidden">
       <svg id="spin-simpan" class="htmx-indicator animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
@@ -112,3 +115,12 @@
     <div id="simpan-hasil" class="w-full"></div>
   </div>
 </form>
+
+<style>
+  .btn-shimmer::after {
+    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-18deg); transition: left .7s ease;
+  }
+  .btn-shimmer:hover::after { left:130%; }
+</style>

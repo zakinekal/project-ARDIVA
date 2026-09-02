@@ -18,7 +18,9 @@
   <div id="hapus-hasil"></div>
 
   <form hx-post="/b/{{ bidang_id }}/data/{{ baris }}/hapus" hx-target="#hapus-hasil" hx-swap="innerHTML" hx-indicator="#spin-hapus"
-    hx-on::before-request="this.querySelector('button[type=submit]').disabled = true">
+    hx-on::before-request="this.querySelector('button[type=submit]').disabled = true"
+    data-loading-label="Menghapus data arsip"
+    data-loading-tone="danger">
     <div class="flex gap-3">
       <button type="submit"
         class="flex-1 bg-red-600 hover:bg-red-700 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors inline-flex items-center justify-center gap-2">

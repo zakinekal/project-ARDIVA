@@ -52,7 +52,7 @@ BIDANG_CONFIG = {
         "nama":           "Bidang Pemerintahan Desa dan Kelurahan",
         "nama_pendek":    "Bidang I — PEMDES",
         "spreadsheet_id": os.getenv("SPREADSHEET_PEMDES", "1AJTg_sjxZzbXpl1pXR4eDQZEnf80F2uz-eACtvGWmV0"),
-        "sub_kegiatan":   ["."],
+        "sub_kegiatan":   ["Fasilitasi Penataan Desa", "Fasilitasi EPDeskel dan Lomdeskel", "Fasiltasi PILKADES", "Fasilitasi Penataan Desa", "Fasiltasi Penetapan Penegasan", "Fasilitasi Pengelolaan Aset Desa", "Fasilitasi Penyusunan Perda", "Pembinaan Aparatur Pemerintahan Desa", "Pembinaan Peningkatan Anggota BPD", "UMUM"],
         "warna":          "#0D6B52",
     },
 

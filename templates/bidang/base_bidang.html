@@ -1,3 +1,4 @@
+<!-- base_bidang.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,93 +7,211 @@
 <title>{% block title %}ARDIVA{% endblock %}</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>
 tailwind.config = {
   theme: { extend: {
     colors: {
-      primary: { DEFAULT:'#0D6B52', light:'#12855F', dark:'#0A5241', faint:'#E8F5F0' },
-      gold: { DEFAULT:'#C9973A', light:'#F0D08A' },
-      ink: '#0F1E2D', muted: '#5A6A7A',
-      surface: '#F5F7FA', border: '#E4E9F0',
+      primary: { DEFAULT:'#0A1330', light:'#1E3B6E', dark:'#050B1E', faint:'#E7ECF6' },
+      gold: { DEFAULT:'#B07C33', light:'#D2A662', dark:'#8A5A22' },
+      garnet: { DEFAULT:'#9C4A2B', light:'#B25A36', dark:'#7C3A20', faint:'#F3E4DC' },
+      ink: '#101826', muted: '#5B6475',
+      surface: '#F7F5EE', border: '#E4E0D3',
     },
     fontFamily: {
-      sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+      display: ['"Fraunces"', 'serif'],
+      sans: ['"Inter"', 'system-ui', 'sans-serif'],
       mono: ['"IBM Plex Mono"', 'monospace'],
     }
   }}
 }
 </script>
 <style>
-  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background:#F5F7FA; }
+  body { font-family: 'Inter', system-ui, sans-serif; background:#F1F3F2; color:#101826; }
+  .font-display { font-family: 'Fraunces', serif; }
   .mono { font-family: 'IBM Plex Mono', monospace; }
+  *:focus-visible { outline:2px solid #B07C33; outline-offset:2px; }
 
-  /* Sidebar */
+  .pulse-dot { animation: pulsedot 1.8s ease-in-out infinite; }
+  @keyframes pulsedot { 0%,100% { opacity:.4; transform:scale(.85);} 50% { opacity:1; transform:scale(1);} }
+
+  /* ---------- shared texture: grain + dust (same signature as the public site) ---------- */
+  .grain { position:fixed; inset:0; z-index:45; pointer-events:none; opacity:.03; }
+  .grid-dots-dark { background-image: radial-gradient(rgba(251,248,242,0.12) 1px, transparent 1px); background-size: 24px 24px; }
+  .dust { position:absolute; border-radius:9999px; background:#D2A662; pointer-events:none; opacity:0; animation: dustFloat linear infinite; }
+  @keyframes dustFloat {
+    0%   { opacity:0; transform: translate(0,0) scale(.6); }
+    10%  { opacity:.5; } 90% { opacity:.28; }
+    100% { opacity:0; transform: translate(var(--dx,24px), -120px) scale(1); }
+  }
+
+  /* ---------- shared ukir/sulur ornament (same motif as the public site) ---------- */
+  .ukir-stroke { stroke-dasharray: 900; stroke-dashoffset: 900; animation: ukirDraw 2.6s cubic-bezier(.22,.7,.2,1) forwards; }
+  .ukir-breathe { animation: ukirBreathe 8s ease-in-out infinite; transform-origin: center; }
+  @keyframes ukirDraw { to { stroke-dashoffset: 0; } }
+  @keyframes ukirBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+
+  /* ---------- shared reveal + tilt + counters (reused across every bidang page) ---------- */
+  .fade-up { opacity:0; transform: translateY(14px); animation: fadeup .6s cubic-bezier(.22,.7,.2,1) forwards; }
+  .fade-up.d1 { animation-delay: .06s; } .fade-up.d2 { animation-delay: .12s; }
+  .fade-up.d3 { animation-delay: .18s; } .fade-up.d4 { animation-delay: .24s; }
+  .fade-up.d5 { animation-delay: .3s; }
+  @keyframes fadeup { to { opacity:1; transform:translateY(0); } }
+
+  .tilt-card { position:relative; z-index:1; transition: transform .18s ease, box-shadow .3s ease, border-color .3s ease; }
+  .tilt-card:hover { box-shadow: 0 20px 45px -14px rgba(10,19,48,.16); border-color: rgba(176,124,51,.35); transform: translateY(-2px); }
+  .tilt-card > * { position:relative; z-index:2; }
+  .tilt-glow { position:absolute; inset:0; border-radius:16px; opacity:0; transition:opacity .3s ease; pointer-events:none; z-index:0;
+    background: radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(176,124,51,.14), transparent 70%); }
+  .tilt-card:hover .tilt-glow { opacity:1; }
+  .counter-num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- seal badge (echoes the stempel/segel motif from the public site) ---------- */
+  .seal-badge {
+    width:22px; height:22px; border-radius:9999px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:#0A1330; border:1.5px solid #B07C33; color:#D2A662; font-weight:700; font-size:10px;
+    box-shadow: inset 0 0 0 2px rgba(176,124,51,.12);
+    opacity:0; transform:scale(.4) rotate(-14deg); animation: sealPop .5s cubic-bezier(.2,.9,.3,1.25) forwards;
+  }
+  @keyframes sealPop { to { opacity:1; transform:scale(1) rotate(0deg); } }
+
+  /* ---------- sidebar ---------- */
   .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
   @media(max-width:767px) {
     .sidebar { position:fixed; top:0; left:0; height:100vh; z-index:50; transform:translateX(-100%); }
     .sidebar.open { transform:translateX(0); }
-    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; }
+    .overlay { display:none; position:fixed; inset:0; background:rgba(5,11,30,.55); z-index:40; }
     .overlay.open { display:block; }
   }
 
-  /* Nav link */
-  .nav-link { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; font-size:13px; color:rgba(255,255,255,.5); transition:all .15s; border-left:2px solid transparent; }
-  .nav-link:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.85); }
-  .nav-link.on { background:rgba(13,107,82,.2); color:#4ADE80; border-left-color:#0D6B52; }
-  .nav-link.on svg { color:#4ADE80; }
+  /* ---------- ambient logo aura ---------- */
+  .logo-aura { position:absolute; inset:-22px; background: radial-gradient(circle, rgba(176,124,51,.32), transparent 70%); filter: blur(18px); animation: aura 6s ease-in-out infinite; pointer-events:none; }
+  @keyframes aura { 0%,100% { transform: translate(0,0) scale(1); opacity:.5; } 50% { transform: translate(8px,-10px) scale(1.1); opacity:.85; } }
 
-  /* htmx spinner */
+  /* ---------- nav link ---------- */
+  .nav-link {
+    display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; font-size:13px;
+    color:rgba(255,255,255,.5); transition:background .15s, color .15s, transform .2s cubic-bezier(.2,.7,.3,1); border-left:2px solid transparent;
+    opacity:0; transform:translateX(-6px); animation: navIn .45s cubic-bezier(.22,.7,.2,1) forwards;
+  }
+  .nav-link:nth-of-type(1){ animation-delay:.04s; } .nav-link:nth-of-type(2){ animation-delay:.09s; }
+  .nav-link:nth-of-type(3){ animation-delay:.14s; } .nav-link:nth-of-type(4){ animation-delay:.19s; }
+  @keyframes navIn { to { opacity:1; transform:translateX(0); } }
+  .nav-link:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.9); transform:translateX(3px); }
+  .nav-link.on {
+    background: linear-gradient(90deg, rgba(176,124,51,.16), rgba(176,124,51,.04));
+    color:#D2A662; border-left-color:#B07C33; box-shadow: inset 0 0 20px rgba(176,124,51,.06);
+  }
+  .nav-link.on svg { color:#D2A662; }
+  .nav-link.on::after {
+    content:''; margin-left:auto; width:5px; height:5px; border-radius:9999px; background:#D2A662;
+    box-shadow:0 0 8px 1px rgba(210,166,98,.7); animation: pulsedot 1.8s ease-in-out infinite;
+  }
+
+  /* ---------- htmx spinner ---------- */
   .htmx-indicator { opacity:0; transition:opacity .15s; }
   .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity:1; }
 
-  /* Card */
-  .card { background:white; border:1px solid #E4E9F0; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+  /* ---------- card ---------- */
+  .card { background:white; border:1px solid #E4E0D3; border-radius:16px; box-shadow:0 1px 3px rgba(10,19,48,.06); overflow:visible !important; }
 
-  /* Field */
-  .fl label { display:block; font-size:11px; font-weight:600; color:#5A6A7A; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+  /* ---------- fields ---------- */
+  .fl label { display:block; font-size:11px; font-weight:600; color:#5B6475; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; font-family:'IBM Plex Mono',monospace; }
   .fl input, .fl select, .fl textarea {
-    width:100%; padding:9px 11px; border:1.5px solid #E4E9F0; border-radius:8px;
-    font-size:13px; color:#0F1E2D; background:white; font-family:inherit; transition:border .15s;
+    width:100%; padding:9px 11px; border:1.5px solid #E4E0D3; border-radius:10px;
+    font-size:13px; color:#101826; background:white; font-family:inherit; transition:border .15s, box-shadow .15s;
   }
-  .fl input:focus, .fl select:focus { outline:none; border-color:#0D6B52; box-shadow:0 0 0 3px rgba(13,107,82,.1); }
-  .fl input.editable-select { padding-right:34px; background-color:white; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235A6A7A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
-  .fl input.editable-select.ai { background-color:#F0FDF4; }
-  .editable-select-wrap { position:relative; }
+  .fl input:focus, .fl select:focus { outline:none; border-color:#B07C33; box-shadow:0 0 0 3px rgba(176,124,51,.16); }
+  .fl input.editable-select { padding-right:34px; background-color:white; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B6475' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
+  .fl input.editable-select.ai { background-color:#F6ECD3; }
+  .editable-select-wrap {
+    position:relative; z-index:60; isolation:isolate;
+  }
   .editable-select-wrap .editable-select { cursor:text; }
-  .editable-select-list { display:none; position:absolute; left:0; right:0; top:calc(100% + 5px); z-index:80; overflow:hidden; background:white; border:1px solid #4B5563; box-shadow:0 4px 8px rgba(0,0,0,.12); }
+  .editable-select-list {
+    display:none; position:absolute; left:0; right:0; top:calc(100% + 6px); z-index:99999;
+    overflow:auto; background:white; border:1px solid rgba(10,19,48,.18);
+    box-shadow:0 18px 30px rgba(10,19,48,.18); border-radius:10px; max-height:220px;
+  }
   .editable-select-list.open { display:block; }
-  .editable-select-option { padding:8px 24px; color:#0F1E2D; font-size:16px; line-height:1.25; cursor:pointer; white-space:nowrap; }
-  .editable-select-option:hover, .editable-select-option.selected { color:white; background:#808080; }
+  .editable-select-option { padding:8px 24px; color:#101826; font-size:14px; line-height:1.25; cursor:pointer; white-space:nowrap; }
+  .editable-select-option:hover, .editable-select-option.selected { color:white; background:#0A1330; }
+  .editable-select-option:hover, .editable-select-option.selected { color:white; background:#0A1330; }
   .editable-select-option.hidden { display:none; }
   .loading-icon { display:none; }
   .loading-icon.animate-spin { display:none; }
   .is-loading .loading-icon.animate-spin { display:block; }
   .htmx-request .loading-icon.animate-spin { display:block; }
-  .fl input.ai { background:#F0FDF4; border-color:#86EFAC; color:#065F46; font-family:'IBM Plex Mono',monospace; }
-  .fl input.ai.editable-select { padding-right:34px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230A5241' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
-  .fl label .ab { display:inline-block; font-size:9px; background:#0D6B52; color:white; border-radius:3px; padding:1px 4px; margin-left:4px; font-weight:700; vertical-align:middle; }
+  .fl input.ai { background:#F6ECD3; border-color:#D2A662; color:#8A5A22; font-family:'IBM Plex Mono',monospace; }
+  .fl input.ai.editable-select { padding-right:34px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A5A22' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; background-size:15px; }
+  .fl label .ab { display:inline-block; font-size:9px; background:#B07C33; color:#FAF9F4; border-radius:4px; padding:1px 5px; margin-left:4px; font-weight:700; vertical-align:middle; }
 
-  /* Badges */
-  .b-ok   { background:#ECFDF5; color:#065F46; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
-  .b-bad  { background:#FEF2F2; color:#991B1B; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
-  .b-warn { background:#FFFBEB; color:#92400E; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+  /* ---------- badges ---------- */
+  .b-ok   { background:#E7ECF6; color:#0A1330; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; }
+  .b-bad  { background:#F3E4DC; color:#7C3A20; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; }
+  .b-warn { background:#F6ECD3; color:#8A5A22; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; }
 
-  /* Scrollbar */
+  /* ---------- scrollbar ---------- */
   ::-webkit-scrollbar { width:5px; height:5px; }
-  ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
+  ::-webkit-scrollbar-thumb { background:#D6CFBB; border-radius:3px; }
 
-  /* Modal backdrop */
-  #modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:60; align-items:center; justify-content:center; padding:16px; }
+  /* ---------- modal ---------- */
+  #modal-backdrop { display:none; position:fixed; inset:0; background:rgba(5,11,30,.55); z-index:60; align-items:center; justify-content:center; padding:16px; }
   #modal-backdrop.open { display:flex; }
-  #modal-content { background:white; border-radius:16px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,.2); }
+  #modal-content { background:white; border-radius:20px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(5,11,30,.3); }
   @keyframes success-pop { 0% { transform:scale(.55); opacity:0; } 70% { transform:scale(1.08); opacity:1; } 100% { transform:scale(1); opacity:1; } }
   @keyframes success-draw { from { stroke-dashoffset:48; } to { stroke-dashoffset:0; } }
+  @keyframes loading-pop { 0% { opacity:0; transform:translateY(12px) scale(.98); } 100% { opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes pulse-ring { 0%, 100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.08); opacity:.8; } }
   .success-modal-card { animation:success-pop .42s cubic-bezier(.2,.8,.2,1) both; }
   .success-check-circle { animation:success-pop .35s ease-out both; }
   .success-check { stroke-dasharray:48; stroke-dashoffset:48; animation:success-draw .5s .22s ease-out forwards; }
 
-  *:focus-visible { outline:2px solid #0D6B52; outline-offset:2px; }
+  .action-loading-backdrop {
+    position:fixed; inset:0; z-index:90; display:flex; align-items:center; justify-content:center; padding:18px;
+    background:rgba(5,11,30,.45); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .action-loading-backdrop.visible { opacity:1; pointer-events:auto; }
+  .action-loading-card {
+    width:min(100%, 360px); border-radius:22px; background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(250,249,244,.97));
+    border:1px solid rgba(10,19,48,.12); box-shadow:0 28px 80px rgba(5,11,30,.3);
+    padding:18px 18px 16px; transform:translateY(8px); opacity:0; animation:loading-pop .28s ease forwards;
+  }
+  .action-loading-header { display:flex; align-items:center; gap:12px; }
+  .action-loading-ring {
+    position:relative; width:52px; height:52px; border-radius:16px; display:grid; place-items:center;
+    background:linear-gradient(135deg, rgba(10,19,48,.14), rgba(30,59,110,.05)); border:1px solid rgba(10,19,48,.14);
+  }
+  .action-loading-ring::before {
+    content:""; position:absolute; inset:9px; border-radius:12px; border:2px solid rgba(176,124,51,.3); border-top-color:#B07C33; border-right-color:#B07C33; animation:spin 0.9s linear infinite;
+  }
+  .action-loading-ring::after {
+    content:""; position:absolute; inset:18px; border-radius:999px; background:linear-gradient(135deg, #0A1330, #1E3B6E); box-shadow:0 0 0 6px rgba(10,19,48,.1); animation:pulse-ring 1.4s ease-in-out infinite;
+  }
+  .action-loading-body { flex:1; min-width:0; }
+  .action-loading-title { font-family:'Fraunces',serif; font-size:14px; font-weight:700; color:#101826; letter-spacing:-0.01em; }
+  .action-loading-subtitle { margin-top:4px; font-size:12px; color:#5B6475; }
+  .action-loading-dots { display:flex; gap:8px; margin-top:12px; }
+  .action-loading-dots span {
+    width:8px; height:8px; border-radius:50%; background:rgba(10,19,48,.25); animation:dotPulse 1.2s ease-in-out infinite;
+  }
+  .action-loading-dots span:nth-child(2) { animation-delay:.15s; }
+  .action-loading-dots span:nth-child(3) { animation-delay:.3s; }
+  .action-loading-danger .action-loading-ring {
+    background:linear-gradient(135deg, rgba(156,74,43,.16), rgba(178,90,54,.05)); border-color:rgba(156,74,43,.16);
+  }
+  .action-loading-danger .action-loading-ring::before { border-top-color:#9C4A2B; border-right-color:#9C4A2B; }
+  .action-loading-danger .action-loading-ring::after { background:linear-gradient(135deg, #9C4A2B, #B25A36); box-shadow:0 0 0 6px rgba(156,74,43,.1); }
+  .action-loading-danger .action-loading-title { color:#7C3A20; }
+  .action-loading-danger .action-loading-subtitle { color:#7C3A20; }
+  .action-loading-danger .action-loading-dots span { background:rgba(156,74,43,.3); }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes dotPulse { 0%, 80%, 100% { transform:scale(.7); opacity:.5; } 40% { transform:scale(1); opacity:1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-link, .logo-aura, .pulse-dot, .dust, .ukir-stroke, .ukir-breathe, .fade-up, .tilt-card, .seal-badge { animation:none !important; opacity:1 !important; transform:none !important; }
+  }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -101,36 +220,74 @@ tailwind.config = {
 </head>
 <body class="antialiased text-ink">
 
+<!-- film grain overlay — same signature texture as the public site -->
+<div class="grain" aria-hidden="true">
+  <svg width="100%" height="100%">
+    <filter id="grainFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grainFilter)"/>
+  </svg>
+</div>
+
+<!-- shared ukir/sulur ornament symbol — reused across sidebar and every bidang page -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="ukirMotif" viewBox="0 0 200 220">
+      <path d="M14 206 C46 186, 34 148, 70 132 C100 118, 86 82, 122 64 C144 53, 138 26, 172 14" fill="none" stroke-linecap="round"/>
+      <path d="M70 132 C48 140, 34 158, 48 170 C58 178, 70 168, 64 156 C60 149, 52 150, 52 158" fill="none" stroke-linecap="round"/>
+      <path d="M122 64 C146 56, 160 38, 146 26 C136 18, 124 28, 130 40 C133 47, 141 46, 141 38" fill="none" stroke-linecap="round"/>
+      <path d="M96 100 C104 94, 112 96, 112 104 C112 110, 104 110, 100 104" fill="none" stroke-linecap="round" opacity=".8"/>
+      <circle cx="70" cy="132" r="3.4" fill="currentColor" stroke="none"/>
+      <circle cx="122" cy="64" r="3.4" fill="currentColor" stroke="none"/>
+      <circle cx="172" cy="14" r="3.2" fill="currentColor" stroke="none"/>
+      <circle cx="14" cy="206" r="3.2" fill="currentColor" stroke="none"/>
+    </symbol>
+  </defs>
+</svg>
+
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
 <div class="flex min-h-screen">
 
   <!-- ── SIDEBAR ── -->
-  <aside class="sidebar w-60 bg-[#0A1628] flex flex-col shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto">
+  <aside class="sidebar w-60 relative overflow-hidden flex flex-col shrink-0 md:sticky md:top-0 md:h-screen md:overflow-y-auto" style="background: linear-gradient(180deg,#050B1E 0%,#0A1330 55%,#0F1C42 100%);">
+    <div class="h-[3px] w-full shrink-0" style="background: linear-gradient(90deg,#8A5A22,#D2A662,#8A5A22);"></div>
+    <div class="absolute inset-0 grid-dots-dark opacity-60 pointer-events-none"></div>
+
+    <!-- decorative ukir ornament, low opacity, anchored to the bottom of the sidebar -->
+    <svg class="absolute -bottom-10 -left-10 w-48 h-56 text-gold/10 pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+      <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6" class="ukir-stroke ukir-breathe"/>
+    </svg>
+    <span class="dust" style="left:70%; top:35%; width:2px; height:2px; --dx:10px; animation-duration:11s; animation-delay:.6s;"></span>
+    <span class="dust" style="left:30%; top:55%; width:2px; height:2px; --dx:-9px; animation-duration:13s; animation-delay:2.4s;"></span>
 
     <!-- Header -->
-    <div class="px-4 py-4 border-b border-white/8">
+    <div class="relative px-4 py-4 border-b border-white/8">
       <div class="flex items-center gap-2.5 mb-3">
-        <div class="w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="relative w-7 h-7 rounded-lg bg-white/5 border border-gold/20 flex items-center justify-center shrink-0">
+          <div class="logo-aura"></div>
+          <svg class="relative w-4 h-4 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/>
             <path d="M10 12h4"/>
           </svg>
         </div>
         <div>
-          <p class="font-bold text-[13px] text-white leading-tight">ARDIVA</p>
-          <p class="text-[10px] text-slate-500 mono">DPMPD Kaltim</p>
+          <p class="font-display font-bold text-[13px] text-white leading-tight">ARDIVA</p>
+          <p class="text-[10px] text-white/40 mono">DPMPD Kaltim</p>
         </div>
       </div>
       <!-- Bidang label -->
-      <div class="bg-white/5 border border-white/8 rounded-lg px-3 py-2">
-        <p class="text-[9px] text-slate-500 uppercase font-semibold tracking-widest mb-0.5">Bidang Aktif</p>
-        <p class="text-[11px] text-slate-200 font-semibold leading-tight">{{ bidang.nama_pendek }}</p>
+      <div class="relative bg-white/5 border border-white/8 rounded-xl px-3 py-2 overflow-hidden">
+        <div class="absolute left-0 top-0 bottom-0 w-[3px]" style="background:linear-gradient(180deg,#8A5A22,#D2A662,#8A5A22);"></div>
+        <p class="text-[9px] text-white/40 uppercase font-semibold tracking-widest mb-0.5 mono pl-1.5">Bidang Aktif</p>
+        <p class="text-[11px] text-white/90 font-semibold leading-tight pl-1.5">{{ bidang.nama_pendek }}</p>
       </div>
     </div>
 
     <!-- Nav -->
-    <nav class="flex-1 px-3 py-3 space-y-0.5">
+    <nav class="relative flex-1 px-3 py-3 space-y-0.5">
       <a href="/b/{{ bidang_id }}/dashboard" class="nav-link {% if active_page=='dashboard' %}on{% endif %}">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/>
@@ -160,21 +317,21 @@ tailwind.config = {
     </nav>
 
     <!-- User info + logout -->
-    <div class="px-3 py-3 border-t border-white/8">
+    <div class="relative px-3 py-3 border-t border-white/8">
       <div class="flex items-center gap-2.5 mb-2.5">
         {% if user.foto %}
         <img src="{{ user.foto }}" class="w-7 h-7 rounded-full shrink-0" alt="">
         {% else %}
-        <div class="w-7 h-7 rounded-full bg-primary/30 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4 text-green-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+        <div class="w-7 h-7 rounded-full bg-gold/25 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
         </div>
         {% endif %}
         <div class="min-w-0">
-          <p class="text-[12px] text-slate-200 font-medium truncate">{{ user.nama }}</p>
-          <p class="text-[10px] text-slate-500 truncate">{{ user.email }}</p>
+          <p class="text-[12px] text-white/90 font-medium truncate">{{ user.nama }}</p>
+          <p class="text-[10px] text-white/40 truncate">{{ user.email }}</p>
         </div>
       </div>
-      <a href="/logout" class="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-colors">
+      <a href="/logout" class="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-white/50 hover:bg-white/5 hover:text-white/85 transition-colors">
         <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>
@@ -187,14 +344,14 @@ tailwind.config = {
   <div class="flex-1 flex flex-col min-w-0">
 
     <!-- Mobile topbar -->
-    <header class="md:hidden flex items-center gap-3 px-4 py-3 bg-[#0A1628] border-b border-white/10 sticky top-0 z-30">
-      <button onclick="openSidebar()" class="text-slate-300 hover:text-white p-1">
+    <header class="md:hidden flex items-center gap-3 px-4 py-3 sticky top-0 z-30" style="background:#0A1330; border-bottom:1px solid rgba(255,255,255,.1);">
+      <button onclick="openSidebar()" class="text-white/70 hover:text-white p-1">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 6h18M3 12h18M3 18h18"/>
         </svg>
       </button>
-      <span class="text-[13px] font-bold text-white">ARDIVA</span>
-      <span class="text-[11px] text-slate-400 truncate">— {{ bidang.nama_pendek }}</span>
+      <span class="text-[13px] font-bold text-white font-display">ARDIVA</span>
+      <span class="text-[11px] text-white/40 truncate">— {{ bidang.nama_pendek }}</span>
     </header>
 
     <main class="flex-1">{% block content %}{% endblock %}</main>
@@ -206,38 +363,38 @@ tailwind.config = {
 <div class="fixed bottom-5 right-5 z-40">
   <div id="help-panel" class="hidden mb-3 w-80 max-w-[85vw] card p-5 shadow-2xl">
     <div class="flex items-center justify-between mb-4">
-      <p class="font-bold text-[14px] text-ink">Cara Input Surat</p>
+      <p class="font-display font-bold text-[14px] text-ink">Cara Input Surat</p>
       <button onclick="toggleHelp()" class="text-muted hover:text-ink">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
       <div class="flex items-start gap-2.5">
-        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</div>
+        <div class="seal-badge">1</div>
         <p class="text-[12px] text-muted">Upload file PDF surat pada halaman Input Surat.</p>
       </div>
       <div class="flex items-start gap-2.5">
-        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</div>
+        <div class="seal-badge">2</div>
         <p class="text-[12px] text-muted">Tunggu sistem membaca isi surat otomatis (10-15 detik).</p>
       </div>
       <div class="flex items-start gap-2.5">
-        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</div>
+        <div class="seal-badge">3</div>
         <p class="text-[12px] text-muted">Periksa hasilnya, koreksi jika ada yang salah baca.</p>
       </div>
       <div class="flex items-start gap-2.5">
-        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</div>
+        <div class="seal-badge">4</div>
         <p class="text-[12px] text-muted">Jika PDF tak terbaca, isi kolom secara manual.</p>
       </div>
       <div class="flex items-start gap-2.5">
-        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</div>
+        <div class="seal-badge">5</div>
         <p class="text-[12px] text-muted">Klik Simpan ke Google Sheets.</p>
       </div>
       <div class="flex items-start gap-2.5">
-        <div class="w-5 h-5 rounded-full bg-primary text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</div>
+        <div class="seal-badge">6</div>
         <p class="text-[12px] text-muted">Notifikasi berhasil muncul — cek di Lihat Data.</p>
       </div>
     </div>
-    <a href="/b/{{ bidang_id }}/panduan" class="mt-4 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary-dark border-t border-border pt-3">
+    <a href="/b/{{ bidang_id }}/panduan" class="mt-4 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary-light border-t border-border pt-3">
       Lihat Panduan Lengkap
       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
@@ -246,7 +403,7 @@ tailwind.config = {
     <span id="help-hint" class="bg-ink text-white text-[12px] font-medium px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap transition-opacity duration-500">
       Butuh bantuan?
     </span>
-    <button onclick="toggleHelp()" class="w-12 h-12 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg flex items-center justify-center transition-colors ring-4 ring-primary/20 shrink-0">
+    <button onclick="toggleHelp()" class="w-12 h-12 rounded-full bg-gold hover:bg-gold-dark text-white shadow-lg flex items-center justify-center transition-colors ring-4 ring-gold/25 shrink-0">
       <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
       </svg>
@@ -260,6 +417,21 @@ tailwind.config = {
   <div id="modal-content"></div>
 </div>
 
+<div id="action-loading-backdrop" class="action-loading-backdrop" aria-live="polite" aria-busy="true" role="status" aria-label="Proses sedang berjalan">
+  <div id="action-loading-card" class="action-loading-card">
+    <div class="action-loading-header">
+      <div class="action-loading-ring" aria-hidden="true"></div>
+      <div class="action-loading-body">
+        <div id="action-loading-title" class="action-loading-title">Memproses data</div>
+        <div id="action-loading-subtitle" class="action-loading-subtitle">Silakan tunggu sebentar...</div>
+      </div>
+    </div>
+    <div class="action-loading-dots" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
 <script>
 function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
 function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
@@ -271,7 +443,40 @@ function openModal(html){
   if (window.htmx) { htmx.process(document.getElementById('modal-content')); }
 }
 function closeModal(e)  { if(e.target===document.getElementById('modal-backdrop')){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; } }
-function closeModalForce(){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; }
+function closeModalForce(){ document.getElementById('modal-backdrop').classList.remove('open'); document.body.style.overflow=''; hideActionLoader(); }
+
+function showActionLoader(label, tone) {
+  const backdrop = document.getElementById('action-loading-backdrop');
+  const card = document.getElementById('action-loading-card');
+  const title = document.getElementById('action-loading-title');
+  const subtitle = document.getElementById('action-loading-subtitle');
+  if (!backdrop || !card || !title || !subtitle) return;
+  title.textContent = label || 'Memproses data';
+  subtitle.textContent = 'Silakan tunggu sebentar...';
+  card.classList.toggle('action-loading-danger', tone === 'danger');
+  backdrop.classList.add('visible');
+}
+function hideActionLoader() {
+  const backdrop = document.getElementById('action-loading-backdrop');
+  if (backdrop) backdrop.classList.remove('visible');
+}
+
+let actionLoaderTimer = null;
+function triggerActionLoader(form) {
+  if (!form || !form.dataset.loadingLabel) return;
+  const label = form.dataset.loadingLabel || 'Memproses data';
+  const tone = form.dataset.loadingTone || 'default';
+  if (actionLoaderTimer) clearTimeout(actionLoaderTimer);
+  actionLoaderTimer = setTimeout(function() {
+    showActionLoader(label, tone);
+  }, 260);
+}
+function clearActionLoaderTimer() {
+  if (actionLoaderTimer) {
+    clearTimeout(actionLoaderTimer);
+    actionLoaderTimer = null;
+  }
+}
 
 function toggleHelp(){
   const panel = document.getElementById('help-panel');
@@ -325,7 +530,13 @@ function initEditableSelects() {
         item.classList.toggle('selected', item.dataset.value === input.value);
       });
     }
-    function openList() { refreshList(); list.classList.add('open'); }
+    function openList() {
+      refreshList();
+      list.style.left = '';
+      list.style.top = '';
+      list.style.width = '';
+      list.classList.add('open');
+    }
     function closeList() { list.classList.remove('open'); }
 
     input.addEventListener('focus', openList);
@@ -336,6 +547,22 @@ function initEditableSelects() {
 }
 
 document.addEventListener('DOMContentLoaded', initEditableSelects);
+
+document.addEventListener('htmx:beforeRequest', function(event) {
+  const form = event.detail.elt && event.detail.elt.closest ? event.detail.elt.closest('form') : null;
+  if (!form || !form.dataset.loadingLabel) return;
+  triggerActionLoader(form);
+});
+
+document.addEventListener('htmx:afterRequest', function() {
+  clearActionLoaderTimer();
+  hideActionLoader();
+});
+
+document.addEventListener('htmx:responseError', function() {
+  clearActionLoaderTimer();
+  hideActionLoader();
+});
 
 // htmx modal target helper
 document.addEventListener('htmx:afterSwap', function(e) {

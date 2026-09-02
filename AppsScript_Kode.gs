@@ -13,7 +13,7 @@ const HEADERS = [
   "tanggal_surat", "kode_klas", "pengirim", "tahun",
   "tk_perkembangan", "jumlah", "kondisi_arsip",
   "retensi_aktif", "retensi_inaktif", "keterangan_jra",
-  "skkd", "klasifikasi_akses", "unit_pengolah",
+  "skkd", "unit_pengolah",
   "kategori_arsip", "nama_file"
 ];
 
@@ -102,7 +102,6 @@ function _headerMap(sheet) {
     retensi_aktif: ["retensiaktif", "aktif"],
     retensi_inaktif: ["retensiinaktif", "inaktif"],
     keterangan_jra: ["keterangan", "keteranganjra"],
-    klasifikasi_akses: ["klasifikasiakses"],
     unit_pengolah: ["unitpengolah"],
     kategori_arsip: ["kategoriarsip"],
     nama_file: ["namafile", "namafilepdf"]

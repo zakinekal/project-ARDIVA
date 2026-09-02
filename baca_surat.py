@@ -13,23 +13,54 @@ import numpy as np
 from PIL import Image
 import io
 import logging
+import pytesseract
 
-# Setup logging
+
+def _resolve_tesseract_binary():
+    """Temukan lokasi binari Tesseract yang terinstal di Windows."""
+    candidates = []
+
+    env_path = os.environ.get("PATH", "")
+    for entry in env_path.split(os.pathsep):
+        if not entry:
+            continue
+        candidates.append(os.path.join(entry, "tesseract.exe"))
+
+    candidates.extend([
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+        r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    ])
+
+    seen = set()
+    for candidate in candidates:
+        normalized = os.path.normpath(candidate)
+        if normalized not in seen and os.path.exists(normalized):
+            seen.add(normalized)
+            return normalized
+    return None
+
+
+_TESSERACT_BIN = _resolve_tesseract_binary()
+if _TESSERACT_BIN:
+    pytesseract.pytesseract.tesseract_cmd = _TESSERACT_BIN
+    os.environ["PATH"] = os.path.dirname(_TESSERACT_BIN) + os.pathsep + os.environ.get("PATH", "")
+
 logger = logging.getLogger(__name__)
 
-# Lazy load OCR reader (load hanya saat diperlukan)
 _ocr_reader = None
 
 def _get_ocr_reader():
-    """Lazy load EasyOCR reader untuk bahasa Indonesia."""
+    """Lazy load Tesseract OCR backend untuk bahasa Indonesia."""
     global _ocr_reader
     if _ocr_reader is None:
         try:
-            import easyocr
-            logger.info("Loading EasyOCR model for Indonesian language...")
-            _ocr_reader = easyocr.Reader(['id'], gpu=False)
-        except ImportError:
-            logger.error("EasyOCR not installed. Install with: pip install easyocr")
+            if _TESSERACT_BIN:
+                pytesseract.pytesseract.tesseract_cmd = _TESSERACT_BIN
+            pytesseract.get_tesseract_version()
+            logger.info("Tesseract OCR backend detected and ready.")
+            _ocr_reader = "tesseract"
+        except Exception as exc:
+            logger.error(f"Tesseract not installed or not on PATH. Install Tesseract OCR and retry. Error: {exc}")
             return None
     return _ocr_reader
 
@@ -38,28 +69,13 @@ MONTHS = {
     "juli": 7, "agustus": 8, "september": 9, "oktober": 10, "november": 11, "desember": 12,
 }
 
-# ---------------------------------------------------------------------------
-# LAPISAN 0: Deteksi dan OCR untuk surat hasil scan
-#
-# Jika PDF tidak memiliki text layer (hasil scan), sistem akan:
-# 1. Ekstrak setiap halaman sebagai gambar
-# 2. Lakukan preprocessing gambar (kontras, brightness)
-# 3. Gunakan EasyOCR untuk ekstrak teks
-# 4. Gabungkan teks dari semua halaman
-# ---------------------------------------------------------------------------
-
 def _has_text_layer(pdf_path):
-    """
-    Deteksi apakah PDF memiliki text layer (teks digital).
-    Return True jika text tersedia, False jika hanya gambar (scan).
-    """
     try:
         with pdfplumber.open(pdf_path) as pdf:
             for halaman in pdf.pages:
-                # Jika ada character objects dengan 'size' > 0, berarti ada text layer
                 if halaman.chars:
                     teks = halaman.extract_text()
-                    if teks and len(teks.strip()) > 50:  # threshold minimal teks
+                    if teks and len(teks.strip()) > 50:
                         return True
         return False
     except Exception as e:
@@ -68,26 +84,14 @@ def _has_text_layer(pdf_path):
 
 
 def _preprocess_image(image_cv):
-    """
-    Preprocessing gambar untuk meningkatkan kualitas OCR:
-    - Grayscale conversion
-    - Contrast/brightness adjustment
-    - Denoising
-    """
     try:
-        # Convert ke grayscale jika masih color
         if len(image_cv.shape) == 3:
             gray = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
         else:
             gray = image_cv
-        
-        # Improve contrast dengan CLAHE (Contrast Limited Adaptive Histogram Equalization)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         enhanced = clahe.apply(gray)
-        
-        # Denoise
         denoised = cv2.fastNlMeansDenoising(enhanced, None, h=10, templateWindowSize=7, searchWindowSize=21)
-        
         return denoised
     except Exception as e:
         logger.warning(f"Error preprocessing image: {e}")
@@ -95,78 +99,60 @@ def _preprocess_image(image_cv):
 
 
 def _extract_text_via_ocr(pdf_path):
-    """
-    Ekstrak teks dari PDF scan menggunakan EasyOCR.
-    Return tuple (teks_lengkap, jumlah_halaman).
-    """
     try:
         reader = _get_ocr_reader()
         if reader is None:
             return "", 0
-        
+
         teks_semua_halaman = []
         halaman_count = 0
-        
+
         with pdfplumber.open(pdf_path) as pdf:
             halaman_count = len(pdf.pages)
-            
+
             for idx, halaman in enumerate(pdf.pages):
                 logger.info(f"OCR processing halaman {idx + 1}/{halaman_count}...")
-                
-                # Convert halaman PDF ke image
                 try:
                     image = halaman.to_image(resolution=300)
-                    image_np = np.array(image)
-                    
-                    # Preprocessing
+                    # PENTING: halaman.to_image() mengembalikan objek wrapper
+                    # pdfplumber.display.PageImage, BUKAN gambar mentah/piksel.
+                    # np.array(image) langsung menghasilkan array KOSONG
+                    # (shape=(), dtype=object) yang cuma membungkus objeknya,
+                    # bukan piksel gambarnya. Harus ambil .original dulu (PIL
+                    # Image asli di dalamnya) baru dikonversi ke numpy array.
+                    # Tanpa ini, _preprocess_image() dan OCR di bawah selalu
+                    # gagal - tapi gagalnya KETELAN diam-diam oleh try/except
+                    # per halaman, sehingga hasil akhirnya cuma teks kosong
+                    # tanpa exception yang kelihatan ke pemanggil.
+                    image_np = np.array(image.original)
+
                     image_processed = _preprocess_image(image_np)
-                    
-                    # OCR
-                    results = reader.readtext(image_processed, detail=0)  # detail=0 untuk hanya teks
-                    
-                    # Gabungkan baris
-                    if results:
-                        teks_halaman = "\n".join(results)
-                        teks_semua_halaman.append(teks_halaman)
-                        logger.info(f"Halaman {idx + 1} OCR berhasil, {len(results)} baris teks ditemukan")
+
+                    pil_image = Image.fromarray(image_processed)
+                    config = "--psm 6"
+                    hasil = pytesseract.image_to_string(pil_image, config=config)
+
+                    if hasil and hasil.strip():
+                        teks_semua_halaman.append(hasil.strip())
+                        logger.info(f"Halaman {idx + 1} OCR berhasil, teks terdeteksi via Tesseract")
                     else:
-                        logger.warning(f"Halaman {idx + 1} tidak ada teks yang terdeteksi")
-                        
+                        logger.warning(f"Halaman {idx + 1} tidak ada teks yang terdeteksi oleh Tesseract")
+
                 except Exception as e:
                     logger.error(f"Error OCR halaman {idx + 1}: {e}")
                     continue
-        
+
         teks_lengkap = "\n".join(teks_semua_halaman).strip()
         return teks_lengkap, halaman_count
-        
+
     except Exception as e:
         logger.error(f"Error extract text via OCR: {e}")
         return "", 0
-
-# ---------------------------------------------------------------------------
-# LAPISAN 1: pembersih artefak template merge-field (mis. e-sign/DOCX->PDF)
-#
-# Beberapa sistem persuratan (khususnya hasil e-sign) menghasilkan PDF di mana
-# nilai asli field dinamis (tanggal, nomor surat, sifat, dst.) dirender TEPAT
-# di posisi yang sama dengan placeholder mentahnya yang belum ter-replace,
-# mis. "${tanggal_naskah}", hanya beda font/layer. pdfplumber mengurutkan
-# karakter satu baris murni berdasarkan posisi X, sehingga dua string yang
-# bertumpuk itu ke-interleave karakter-per-karakter dan jadi teks acak
-# (mis. "Samarinda, $1{5t aJnuglig 2a0l_2n6askah}").
-#
-# Strategi: kelompokkan karakter per baris (toleransi posisi Y), lalu per
-# font dalam baris yang sama. Kalau teks salah satu font-run di baris itu
-# cocok pola "${nama_variabel}", buang HANYA span karakter placeholder itu
-# (bukan seluruh baris/font), sisanya (nilai asli + teks statis lain di
-# baris yang sama) dibiarkan utuh sehingga baris tetap bisa direkonstruksi
-# secara normal oleh pdfplumber setelahnya.
-# ---------------------------------------------------------------------------
 
 _POLA_PLACEHOLDER = re.compile(r"\$\{[A-Za-z_][A-Za-z0-9_]*\}")
 
 
 def _kelompokkan_baris(chars, toleransi=2.5):
-    """Kelompokkan karakter yang posisi 'top'-nya berdekatan jadi satu baris kasar."""
     chars_terurut = sorted(chars, key=lambda c: c["top"])
     baris_list = []
     for c in chars_terurut:
@@ -182,25 +168,15 @@ def _kelompokkan_baris(chars, toleransi=2.5):
 
 
 def _bersihkan_karakter_placeholder(chars):
-    """
-    Dari seluruh karakter satu halaman, kembalikan daftar karakter dengan
-    span '${...}' yang bertumpuk di baris yang sama dengan konten lain
-    sudah dibuang. Aman dipanggil pada halaman tanpa masalah ini sekalipun
-    (tidak akan mengubah apa-apa jika tidak ada tumpang tindih font).
-    """
     id_dibuang = set()
     for baris in _kelompokkan_baris(chars):
         per_font = {}
         for c in baris:
             per_font.setdefault(c["fontname"], []).append(c)
         if len(per_font) < 2:
-            continue  # baris normal, cuma 1 layer font -> tidak mungkin tumpang tindih
+            continue
         for font, fchars in per_font.items():
             fchars_terurut = sorted(fchars, key=lambda c: c["x0"])
-            # Guard: kalau ada unit karakter multi-huruf (ligature dsb.),
-            # index string tidak 1:1 dengan index list -> lewati span-removal
-            # halus, buang seluruh font-run ini saja demi keamanan jika
-            # run itu murni placeholder (tidak ada teks lain tercampur).
             multi_char = any(len(c["text"]) != 1 for c in fchars_terurut)
             teks = "".join(c["text"] for c in fchars_terurut)
             if multi_char:
@@ -214,23 +190,14 @@ def _bersihkan_karakter_placeholder(chars):
 
 
 def extract_text_from_pdf(path_pdf):
-    """
-    Ekstrak teks dari PDF dengan deteksi otomatis:
-    - Coba baca teks digital dulu (fast path)
-    - Jika gagal atau minimal, fallback ke OCR (slow path)
-    
-    Return tuple (teks, halaman_count).
-    """
     teks, halaman_count = [], 0
     butuh_ocr = False
-    
+
     try:
         with pdfplumber.open(path_pdf) as pdf:
             halaman_count = len(pdf.pages)
             for halaman in pdf.pages:
                 chars_asli = halaman.chars
-                # Fast path: kalau tidak ada indikasi placeholder mentah sama
-                # sekali di halaman ini, tidak perlu proses tambahan.
                 if not any(c["text"] == "$" for c in chars_asli):
                     halaman_teks = halaman.extract_text()
                 else:
@@ -245,10 +212,9 @@ def extract_text_from_pdf(path_pdf):
     except Exception as e:
         logger.warning(f"Error extracting digital text from PDF: {e}")
         butuh_ocr = True
-    
+
     teks_hasil = "\n".join(teks).strip()
-    
-    # Jika teks sangat minimal (< 100 karakter), kemungkinan hasil scan
+
     if len(teks_hasil) < 100:
         logger.info("Teks minimal terdeteksi, mencoba OCR...")
         butuh_ocr = True
@@ -258,18 +224,9 @@ def extract_text_from_pdf(path_pdf):
             butuh_ocr = False
         else:
             butuh_ocr = True
-    
+
     return teks_hasil, halaman_count, butuh_ocr
 
-
-# ---------------------------------------------------------------------------
-# LAPISAN 2: sanitasi terakhir pada nilai field hasil parsing.
-#
-# Jaring pengaman kalau suatu saat ada pola korupsi lain (font tak dikenal,
-# placeholder dengan sintaks beda, dsb.) yang lolos dari Lapisan 1: setiap
-# field akhir tetap disaring dari sisa karakter '$ { }' dan spasi ganda yang
-# tidak wajar sebelum dikembalikan ke caller.
-# ---------------------------------------------------------------------------
 
 def _sanitasi_field(value):
     if not value:
@@ -318,11 +275,6 @@ def clean_text(value):
 def find_no_surat(text):
     lines = text.splitlines()
     for i, line in enumerate(lines):
-        # Hanya anggap ini baris field "Nomor" kalau kata "Nomor" ada di AWAL
-        # baris (setelah spasi/tab). Ini untuk menghindari salah tangkap kata
-        # "Nomor" yang muncul di tengah kalimat lain, misalnya pada alamat di
-        # kop surat: "Jalan Gajah Mada Nomor 2, Samarinda, ..." - di situ kata
-        # "Nomor" bukan label field, melainkan bagian dari nama jalan.
         if not re.match(r"^\s*nomor\b", line, re.IGNORECASE):
             continue
 
@@ -355,10 +307,6 @@ def find_no_surat(text):
 
         if not candidate:
             continue
-        # Nomor surat asli tidak pernah mengandung spasi di tengah kode -
-        # kalau lolos dari Lapisan 1 masih ada spasi nyasar antar
-        # token yang jelas menyambung (huruf/angka|/), rapatkan dulu
-        # sebelum divalidasi, supaya tidak salah terpotong di bawah.
         candidate_rapat = re.sub(r"(?<=[A-Za-z0-9/.\-])\s+(?=[A-Za-z0-9])", "", candidate)
         if re.match(r"^[0-9A-Za-z\./\-]+$", candidate_rapat):
             candidate = candidate_rapat

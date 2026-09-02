@@ -1,30 +1,44 @@
+<!-- input_manual.html -->
+
 {% extends "bidang/base_bidang.html" %}
 {% block title %}Input Manual - {{ bidang.nama_pendek }}{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-8 py-8">
-  <div class="mb-6">
-    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">
-      Input Manual</p>
-    <h1 class="text-[22px] font-extrabold text-ink">Input Data Tanpa PDF</h1>
-    <p class="text-muted text-[13px] mt-1">
-      Isi seluruh kolom secara manual. Kolom bertanda <span class="text-red-600 font-bold">*</span> wajib diisi.</p>
+
+  <!-- Header banner — same brand language as Input Surat / dashboard hero -->
+  <div class="relative overflow-hidden rounded-2xl mb-6 fade-up" style="background: radial-gradient(120% 140% at 100% 0%, #1E3B6E 0%, #0A1330 55%, #050B1E 100%);">
+    <div class="absolute inset-0 grid-dots-dark opacity-30 pointer-events-none"></div>
+    <svg class="absolute -top-8 -right-10 w-52 h-60 text-gold/10 pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+      <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6" class="ukir-stroke ukir-breathe"/>
+    </svg>
+    <span class="dust" style="left:80%; top:60%; width:2px; height:2px; --dx:12px; animation-duration:10s; animation-delay:.3s;"></span>
+    <div class="relative px-6 sm:px-8 py-7 sm:py-8">
+      <p class="text-gold-light text-[10px] font-semibold tracking-widest uppercase mono mb-1.5">Input Manual</p>
+      <h1 class="font-display text-[22px] sm:text-[26px] font-semibold text-white">Input Data Tanpa PDF</h1>
+      <p class="text-white/55 text-[13px] mt-1.5 max-w-md">Isi seluruh kolom secara manual. Kolom bertanda <span class="text-gold-light font-bold">*</span> wajib diisi.</p>
+    </div>
   </div>
-  <div class="mb-4">
+
+  <div class="mb-4 fade-up d1">
     <a href="/b/{{ bidang_id }}/input"
-       class="text-[13px] text-muted hover:text-primary transition-colors">
-      ← Kembali ke upload PDF</a>
+       class="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-primary transition-colors">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m0 0l6 6m-6-6l6-6"/></svg>
+      Kembali ke upload PDF
+    </a>
   </div>
+
     <form hx-post="/b/{{ bidang_id }}/input/simpan"
         hx-target="#hasil-simpan" hx-swap="innerHTML"
       hx-encoding="multipart/form-data" hx-indicator="#spin-manual" class="space-y-4">
 
-    <div class="card p-5">
-      <h2 class="text-[14px] font-bold text-ink mb-4">Data Surat</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="fl"><label>No Surat <span class="text-red-600 font-bold">*</span></label>
+    <div class="tilt-card relative card p-5 fade-up d2">
+      <div class="tilt-glow"></div>
+      <h2 class="relative text-[14px] font-bold text-ink mb-4">Data Surat</h2>
+      <div class="relative grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="fl"><label>No Surat <span class="text-garnet font-bold">*</span></label>
           <input type="text" name="no_surat" required class="mono"
                  placeholder="400.10.2.1/123/DPMPD-II/2026"></div>
-        <div class="fl"><label>Uraian Arsip / Perihal <span class="text-red-600 font-bold">*</span></label>
+        <div class="fl"><label>Uraian Arsip / Perihal <span class="text-garnet font-bold">*</span></label>
           <input type="text" name="uraian_arsip" required
                  placeholder="Isi sesuai perihal surat"></div>
         <div class="fl"><label>Tanggal Surat</label>
@@ -50,10 +64,6 @@
       <option value="TERBUKA">
       <option value="TERTUTUP">
     </datalist>
-    <datalist id="akses-options">
-      <option value="TERBUKA">
-      <option value="TERTUTUP">
-    </datalist>
     <datalist id="tk-options">
       <option value="COPY">
       <option value="ASLI">
@@ -68,9 +78,10 @@
       <option value="SURAT MASUK">
     </datalist>
 
-    <div class="card p-5">
-      <h2 class="text-[14px] font-bold text-ink mb-4">Klasifikasi Arsip</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="tilt-card relative card p-5 fade-up d3 overflow-visible">
+      <div class="tilt-glow"></div>
+      <h2 class="relative text-[14px] font-bold text-ink mb-4">Klasifikasi Arsip</h2>
+      <div class="relative grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="fl"><label>Kode Klas</label>
           <input type="text" name="kode_klas" class="mono"
                  placeholder="400.10.2.1"></div>
@@ -86,51 +97,64 @@
         <div class="fl"><label>Retensi Inaktif</label>
           <input type="text" name="retensi_inaktif"
                  placeholder="Contoh: 3 Tahun"></div>
-        <div class="fl"><label>Keterangan</label>
-          <input type="text" name="keterangan_jra" list="keterangan-options" class="editable-select" placeholder="Pilih atau ketik manual"></div>
-        <div class="fl"><label>SKKD</label>
-          <input type="text" name="skkd" list="skkd-options" class="editable-select" placeholder="Pilih atau ketik manual"></div>
-        <div class="fl"><label>Klasifikasi Akses</label>
-          <input type="text" name="klasifikasi_akses" list="akses-options" class="editable-select" placeholder="Pilih atau ketik manual"></div>
+        <div class="fl">
+          <label>Keterangan</label>
+          <input type="text" name="keterangan_jra" list="keterangan-options" class="editable-select" placeholder="Pilih atau ketik manual">
+        </div>
+        <div class="fl">
+          <label>SKKD</label>
+          <input type="text" name="skkd" list="skkd-options" class="editable-select" placeholder="Pilih atau ketik manual">
+        </div>
       </div>
     </div>
 
-    <div class="card p-5">
-      <h2 class="text-[14px] font-bold text-ink mb-4">Detail Penyimpanan</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="fl"><label>TK Perkembangan</label>
-          <input type="text" name="tk_perkembangan" list="tk-options" class="editable-select" placeholder="Pilih atau ketik manual"></div>
-        <div class="fl"><label>Kondisi Arsip</label>
-          <input type="text" name="kondisi_arsip" list="kondisi-options" class="editable-select" placeholder="Pilih atau ketik manual"></div>
-        <div class="fl"><label>Kategori Arsip</label>
-          <input type="text" name="kategori_arsip" list="kategori-options" class="editable-select" placeholder="Pilih atau ketik manual"></div>
+    <div class="tilt-card relative card p-5 fade-up d4 overflow-visible">
+      <div class="tilt-glow"></div>
+      <h2 class="relative text-[14px] font-bold text-ink mb-4">Detail Penyimpanan</h2>
+      <div class="relative grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="fl">
+          <label>TK Perkembangan</label>
+          <input type="text" name="tk_perkembangan" list="tk-options" class="editable-select" placeholder="Pilih atau ketik manual">
+        </div>
+        <div class="fl">
+          <label>Kondisi Arsip</label>
+          <input type="text" name="kondisi_arsip" list="kondisi-options" class="editable-select" placeholder="Pilih atau ketik manual">
+        </div>
+        <div class="fl">
+          <label>Kategori Arsip</label>
+          <input type="text" name="kategori_arsip" list="kategori-options" class="editable-select" placeholder="Pilih atau ketik manual">
+        </div>
       </div>
     </div>
 
-    <div class="card p-5">
-      <h2 class="text-[14px] font-bold text-ink mb-4">Input/Masukkan File <span class="text-red-600 font-bold">*</span></h2>
+    <div class="tilt-card relative card p-5 fade-up d4">
+      <div class="tilt-glow"></div>
+      <h2 class="relative text-[14px] font-bold text-ink mb-4">Input/Masukkan File <span class="text-garnet font-bold">*</span></h2>
       <label for="file-manual"
-        class="flex flex-col items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-border
-               bg-surface-alt/50 px-6 py-8 text-center cursor-pointer
-               hover:border-primary/40 hover:bg-primary/[0.03] transition-colors">
-        <svg class="w-8 h-8 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-        </svg>
+        id="upload-box-manual"
+        class="relative flex flex-col items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-border
+               bg-surface px-6 py-8 text-center cursor-pointer
+               hover:border-gold/50 hover:bg-gold/[0.03] transition-all duration-200">
+        <div id="upload-icon-manual" class="relative w-11 h-11 rounded-xl bg-gold/15 flex items-center justify-center transition-transform duration-300">
+          <svg class="w-6 h-6 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+        </div>
         <span id="manual-picker-title" class="text-[13px] font-semibold text-ink">Klik untuk memilih file</span>
         <span id="manual-picker-subtitle" class="text-[11.5px] text-muted">Nama file akan disimpan ke kolom nama_file</span>
         <input id="file-manual" type="file" name="nama_file" accept=".pdf" required class="hidden"
           onchange="tampilkanFileManual(this)">
       </label>
       <p id="manual-file-name" class="text-[12.5px] text-muted mt-2.5 pl-1">Belum ada file dipilih</p>
-      <p class="text-[12px] font-semibold text-red-600 mt-1 pl-1">File PDF wajib diisi.</p>
+      <p class="text-[12px] font-semibold text-garnet mt-1 pl-1">File PDF wajib diisi.</p>
     </div>
 
     <input type="hidden" name="force" value="false">
 
-    <div class="flex flex-col sm:flex-row items-start gap-3">
+    <div class="flex flex-col sm:flex-row items-start gap-3 fade-up d5">
       <button type="submit"
-        class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark
-               text-white text-[13px] font-semibold px-6 py-2.5 rounded-lg transition-colors">
+        class="btn-shimmer relative inline-flex items-center gap-2 bg-primary hover:bg-primary-dark
+               text-white text-[13px] font-semibold px-6 py-2.5 rounded-lg transition-colors overflow-hidden">
         <svg id="spin-manual" class="htmx-indicator animate-spin w-4 h-4"
              viewBox="0 0 24 24" fill="none">
           <circle class="opacity-25" cx="12" cy="12" r="10"
@@ -145,6 +169,40 @@
   </form>
 </div>
 
+<style>
+  .fade-up { opacity:0; transform: translateY(14px); animation: fadeup .6s cubic-bezier(.22,.7,.2,1) forwards; }
+  .fade-up.d1 { animation-delay: .05s; } .fade-up.d2 { animation-delay: .1s; }
+  .fade-up.d3 { animation-delay: .15s; } .fade-up.d4 { animation-delay: .2s; } .fade-up.d5 { animation-delay: .25s; }
+  @keyframes fadeup { to { opacity:1; transform:translateY(0); } }
+
+  .tilt-card {
+    position:relative; z-index:1; overflow:visible !important;
+    transition: transform .15s ease, box-shadow .3s ease, border-color .3s ease;
+  }
+  .tilt-card:hover {
+    z-index:3; box-shadow: 0 20px 45px -16px rgba(10,19,48,.16); transform: translateY(-2px);
+  }
+  .tilt-glow { position:absolute; inset:0; border-radius:16px; opacity:0; transition:opacity .3s ease; pointer-events:none;
+    background: radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(176,124,51,.14), transparent 70%); }
+  .tilt-card:hover .tilt-glow { opacity:1; }
+
+  .btn-shimmer::after {
+    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-18deg); transition: left .7s ease;
+  }
+  .btn-shimmer:hover::after { left:130%; }
+
+  #upload-box-manual.drag-active { border-color:#B07C33; background-color:rgba(176,124,51,.07); transform:scale(1.005); }
+  #upload-box-manual.file-ready { border-style:solid; border-color:rgba(176,124,51,.5); }
+  #upload-icon-manual.pop { animation: iconPopManual .4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes iconPopManual { 0% { transform:scale(.7) rotate(-6deg); opacity:.4; } 60% { transform:scale(1.12) rotate(2deg); } 100% { transform:scale(1) rotate(0); opacity:1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up, .tilt-card, .btn-shimmer::after, #upload-icon-manual.pop { animation:none !important; transition:none !important; opacity:1 !important; transform:none !important; }
+  }
+</style>
+
 <script>
 function tampilkanFileManual(input) {
   const namaFile = input.files[0]?.name || '';
@@ -153,7 +211,43 @@ function tampilkanFileManual(input) {
     ? 'File siap diinput dan nama file akan disimpan ke spreadsheet'
     : 'Nama file akan disimpan ke kolom nama_file';
   document.getElementById('manual-file-name').textContent = namaFile || 'Belum ada file dipilih';
+
+  const box = document.getElementById('upload-box-manual');
+  const icon = document.getElementById('upload-icon-manual');
+  if (namaFile && box && icon) {
+    box.classList.add('file-ready');
+    icon.classList.remove('pop');
+    void icon.offsetWidth;
+    icon.classList.add('pop');
+  }
 }
+
+// ---- drag & drop enhancement ----
+(function () {
+  const box = document.getElementById('upload-box-manual');
+  const input = document.getElementById('file-manual');
+  if (!box || !input) return;
+
+  ['dragenter', 'dragover'].forEach(function (evt) {
+    box.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      box.classList.add('drag-active');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (evt) {
+    box.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      box.classList.remove('drag-active');
+    });
+  });
+  box.addEventListener('drop', function (e) {
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files.length > 0) {
+      input.files = files;
+      tampilkanFileManual(input);
+    }
+  });
+})();
 </script>
 
 {% endblock %}

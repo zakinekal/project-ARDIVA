@@ -69,16 +69,20 @@ def test_ocr_reader_lazy_load():
         reader = _get_ocr_reader()
         
         if reader is None:
-            print("⚠ OCR Reader returned None (likely missing dependencies)")
-            return True  # Not a failure, just unavailable
+            print("⚠ Tesseract runtime is not installed on this machine")
+            return False
         
-        print("✓ OCR Reader loaded successfully")
-        print(f"  - Reader type: {type(reader).__name__}")
+        reader_name = str(reader).lower()
+        if "tesseract" not in reader_name and "tesseract" not in type(reader).__name__.lower():
+            print(f"✗ Expected Tesseract backend, got: {type(reader).__name__}")
+            return False
+
+        print("✓ Tesseract backend loaded successfully")
+        print(f"  - Backend name: {type(reader).__name__}")
         return True
     except Exception as e:
-        print(f"⚠ OCR Reader loading warning: {e}")
-        # Not critical failure, OCR might not be fully set up
-        return True
+        print(f"✗ OCR Reader loading failed: {e}")
+        return False
 
 
 def test_preprocessing_function():

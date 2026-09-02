@@ -1,100 +1,97 @@
+<!-- input.html -->
+
 {% extends "bidang/base_bidang.html" %}
 {% block title %}Input Surat — {{ bidang.nama_pendek }}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-8 py-8">
 
-  <!-- Header -->
-  <div class="mb-8">
-    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">
-      Input Surat Masuk
-    </p>
-
-    <h1 class="text-[22px] sm:text-[26px] font-extrabold text-ink">
-      Tambah Surat Masuk
-    </h1>
-
-    <p class="text-muted text-[13px] mt-1">
-      Pilih metode input di bawah ini untuk mulai mencatat surat masuk.
-    </p>
+  <!-- Header banner — same brand language as the dashboard hero -->
+  <div class="relative overflow-hidden rounded-2xl mb-8 fade-up" style="background: radial-gradient(120% 140% at 100% 0%, #1E3B6E 0%, #0A1330 55%, #050B1E 100%);">
+    <div class="absolute inset-0 grid-dots-dark opacity-30 pointer-events-none"></div>
+    <svg class="absolute -top-8 -right-10 w-52 h-60 text-gold/10 pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+      <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6" class="ukir-stroke ukir-breathe"/>
+    </svg>
+    <span class="dust" style="left:82%; top:55%; width:2px; height:2px; --dx:12px; animation-duration:10s; animation-delay:.3s;"></span>
+    <span class="dust" style="left:70%; top:75%; width:1.6px; height:1.6px; --dx:-8px; animation-duration:12s; animation-delay:1.6s;"></span>
+    <div class="relative px-6 sm:px-8 py-7 sm:py-8">
+      <p class="text-gold-light text-[10px] font-semibold tracking-widest uppercase mono mb-1.5">Input Surat Masuk</p>
+      <h1 class="font-display text-[24px] sm:text-[28px] font-semibold text-white">Tambah Surat Masuk</h1>
+      <p class="text-white/55 text-[13px] mt-1.5 max-w-md">Pilih metode input di bawah ini untuk mulai mencatat surat masuk.</p>
+    </div>
   </div>
 
   {% if save_success %}
-  <div id="success-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/35 px-4" role="dialog" aria-modal="true" aria-labelledby="success-title">
-    <div class="success-modal-card w-full max-w-md rounded-2xl bg-white px-6 py-9 text-center shadow-2xl">
-      <div class="success-check-circle mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-full border-[5px] border-primary">
-        <svg class="h-16 w-16 text-primary" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+  <div id="success-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-primary-dark/50 backdrop-blur-sm px-4" role="dialog" aria-modal="true" aria-labelledby="success-title">
+    <div class="success-modal-card relative w-full max-w-md rounded-2xl bg-white px-6 py-9 text-center shadow-2xl overflow-hidden">
+      <div class="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-gold/10 blur-2xl pointer-events-none"></div>
+      <svg class="absolute -bottom-8 -left-10 w-40 h-44 text-gold/[0.06] pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+        <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
+      <div class="success-check-circle relative mx-auto mb-5 flex h-28 w-28 items-center justify-center rounded-full border-[5px] border-gold bg-gold/5">
+        <svg class="h-16 w-16 text-gold-dark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
           <path class="success-check" d="M10 25l9 9 19-20"/>
         </svg>
       </div>
-      <h2 id="success-title" class="text-[22px] font-bold text-ink">Berhasil</h2>
+      <h2 id="success-title" class="font-display text-[22px] font-semibold text-ink">Berhasil</h2>
       <p class="mt-2 text-[14px] text-muted">Surat berhasil disimpan ke Google Sheets.</p>
-      <p class="mt-5 text-[11px] font-semibold uppercase tracking-widest text-muted">Nomor Urut</p>
-      <p class="mt-1 text-[52px] font-extrabold leading-none text-primary mono">{{ saved_nomor or '—' }}</p>
+      <p class="mt-5 text-[11px] font-semibold uppercase tracking-widest text-muted mono">Nomor Urut</p>
+      <p class="mt-1 text-[52px] font-semibold leading-none text-primary mono">{{ saved_nomor or '—' }}</p>
       <button type="button" onclick="document.getElementById('success-modal').remove()"
-        class="mt-7 rounded-lg bg-primary px-8 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-dark">
+        class="btn-shimmer relative mt-7 rounded-xl bg-primary px-8 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-light">
         OK
       </button>
     </div>
   </div>
   {% endif %}
 
-
   <!-- Pilihan Metode -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
 
     <!-- Opsi 1: Otomatis -->
-    <div class="relative card p-5 border-2 border-primary/25 bg-primary/[0.03]">
+    <div class="tilt-card relative card p-5 border-2 border-gold/35 bg-gold/[0.04] fade-up d2 overflow-hidden">
+      <div class="tilt-glow"></div>
 
       <span class="absolute top-4 right-4 text-[10px] font-bold tracking-wide uppercase
-                   text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                   text-white bg-gold px-2.5 py-0.5 rounded-full shadow-sm">
         Direkomendasikan
       </span>
 
-      <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-        <svg class="w-5 h-5 text-primary"
-             viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="2">
+      <div class="relative w-10 h-10 rounded-lg bg-gold/15 flex items-center justify-center mb-3">
+        <svg class="w-5 h-5 text-gold-dark"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
         </svg>
       </div>
 
-      <h3 class="text-[14px] font-bold text-ink mb-1">
+      <h3 class="font-display text-[14px] font-semibold text-ink mb-1">
         Input Otomatis
       </h3>
 
       <p class="text-muted text-[12.5px] leading-relaxed">
         Unggah berkas PDF surat masuk — sistem akan membaca dan mengisi data secara otomatis.
       </p>
-
     </div>
-
 
     <!-- Opsi 2: Manual -->
     <a href="/b/{{ bidang_id }}/input/manual"
-       class="group card p-5 border border-border hover:border-primary/30
-              hover:bg-primary/[0.02] transition-colors">
+       class="tilt-card group relative card p-5 border border-border hover:border-primary/25
+              transition-colors fade-up d3 overflow-hidden">
+      <div class="tilt-glow"></div>
 
-      <div class="w-10 h-10 rounded-lg bg-surface-alt border border-border
+      <div class="relative w-10 h-10 rounded-lg bg-surface border border-border
                   flex items-center justify-center mb-3
-                  group-hover:border-primary/30
-                  group-hover:bg-primary/10 transition-colors">
-
+                  group-hover:border-primary/25
+                  group-hover:bg-primary-faint transition-colors">
         <svg class="w-5 h-5 text-muted group-hover:text-primary transition-colors"
-             viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="2">
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5
                    M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4
                    9.5-9.5z"/>
         </svg>
-
       </div>
 
-      <h3 class="text-[14px] font-bold text-ink mb-1
+      <h3 class="font-display text-[14px] font-semibold text-ink mb-1
                  group-hover:text-primary transition-colors">
         Input Manual
       </h3>
@@ -102,75 +99,52 @@
       <p class="text-muted text-[12.5px] leading-relaxed">
         Ketik langsung data surat satu per satu tanpa berkas PDF.
       </p>
-
     </a>
-
   </div>
 
-
-
   <!-- Card Upload -->
-  <div class="card p-5 sm:p-6">
+  <div class="tilt-card relative card p-5 sm:p-6 fade-up d4 overflow-hidden">
+    <div class="tilt-glow"></div>
 
     <!-- Judul -->
-    <div class="flex items-center gap-2 mb-5">
-
-      <div class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-
-        <svg class="w-3.5 h-3.5 text-primary"
-             viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="2">
+    <div class="relative flex items-center gap-2 mb-5">
+      <div class="w-6 h-6 rounded-md bg-gold/15 flex items-center justify-center">
+        <svg class="w-3.5 h-3.5 text-gold-dark"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
         </svg>
-
       </div>
-
-      <h2 class="text-[13px] font-bold text-ink uppercase tracking-wide">
-        Berkas PDF Surat Masuk <span class="text-red-600 font-bold">*</span>
+      <h2 class="text-[13px] font-bold text-ink uppercase tracking-wide mono">
+        Berkas PDF Surat Masuk <span class="text-garnet font-bold">*</span>
       </h2>
-
     </div>
 
-
-
     <!-- Form -->
-        <form id="form-upload-pdf" method="post"
+    <form id="form-upload-pdf" method="post"
           action="/b/{{ bidang_id }}/input/proses"
           enctype="multipart/form-data"
           onsubmit="mulaiLoading(this)">
-
 
       <!-- KOTAK UPLOAD -->
       <label
         for="file-surat"
         id="upload-box"
-        class="flex flex-col items-center justify-center gap-2
+        class="relative flex flex-col items-center justify-center gap-2
                w-full rounded-xl border-2 border-dashed border-border
-               bg-surface-alt/50 px-6 py-10 text-center cursor-pointer
-               hover:border-primary/40 hover:bg-primary/[0.03]
-               transition-colors">
-
+               bg-surface px-6 py-10 text-center cursor-pointer
+               hover:border-gold/50 hover:bg-gold/[0.03]
+               transition-all duration-200">
 
         <!-- ICON UPLOAD -->
         <div id="upload-icon"
-             class="w-12 h-12 rounded-xl bg-primary/10
-                    flex items-center justify-center">
-
-          <svg class="w-7 h-7 text-primary"
-               viewBox="0 0 24 24"
-               fill="none"
-               stroke="currentColor"
-               stroke-width="1.75">
-
+             class="relative w-12 h-12 rounded-xl bg-gold/15
+                    flex items-center justify-center transition-transform duration-300">
+          <svg class="w-7 h-7 text-gold-dark"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1
                      m-4-8l-4-4m0 0L8 8m4-4v12"/>
-
           </svg>
-
         </div>
-
 
         <!-- NAMA FILE / TEKS -->
         <span id="file-name"
@@ -178,13 +152,11 @@
           Klik untuk pilih berkas, atau seret ke sini
         </span>
 
-
         <!-- INFORMASI FILE -->
         <span id="file-info"
               class="text-[11.5px] text-muted">
           Format PDF, maksimal 10 MB
         </span>
-
 
         <!-- INPUT FILE -->
         <input
@@ -196,69 +168,80 @@
           class="hidden"
           onchange="tampilkanFile(this)"
         >
-
       </label>
-
-
 
       <!-- TOMBOL PROSES -->
       <button
         id="btn-proses"
         type="submit"
-        class="mt-4 inline-flex items-center gap-2
-               bg-primary hover:bg-primary-dark text-white
+        class="btn-shimmer relative mt-4 inline-flex items-center gap-2
+               bg-primary hover:bg-primary-light text-white
                text-[13px] font-semibold px-6 py-2.5
-               rounded-lg shadow-sm transition-colors">
-
+               rounded-xl shadow-sm shadow-primary/20 transition-colors">
 
         <!-- Loading -->
         <svg
           id="spin-proses"
           class="loading-icon animate-spin w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none">
-
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"/>
-
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-
+          viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
         </svg>
-
 
         <!-- Icon -->
-        <svg
-          class="w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2">
-
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1
                    m-4-8l-4-4m0 0L8 8m4-4v12"/>
-
         </svg>
 
-
         Proses Surat
-
       </button>
-
     </form>
-
   </div>
-
 </div>
 
+<style>
+  .fade-up { opacity:0; transform: translateY(14px); animation: fadeup .6s cubic-bezier(.22,.7,.2,1) forwards; }
+  .fade-up.d1 { animation-delay: .05s; } .fade-up.d2 { animation-delay: .1s; }
+  .fade-up.d3 { animation-delay: .15s; } .fade-up.d4 { animation-delay: .2s; }
+  @keyframes fadeup { to { opacity:1; transform:translateY(0); } }
 
+  .tilt-card { transition: transform .15s ease, box-shadow .3s ease, border-color .3s ease; }
+  .tilt-card:hover { box-shadow: 0 20px 45px -16px rgba(10,19,48,.16); transform: translateY(-2px); }
+  .tilt-glow { position:absolute; inset:0; border-radius:16px; opacity:0; transition:opacity .3s ease; pointer-events:none;
+    background: radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(176,124,51,.14), transparent 70%); }
+  .tilt-card:hover .tilt-glow { opacity:1; }
+
+  .btn-shimmer { overflow:hidden; }
+  .btn-shimmer::after {
+    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-18deg); transition: left .7s ease;
+  }
+  .btn-shimmer:hover::after { left:130%; }
+
+  /* dropzone idle shimmer border to draw the eye */
+  #upload-box { background-size: 220% 220%; }
+  #upload-box::before {
+    content:''; position:absolute; inset:0; border-radius:11px; padding:2px;
+    background: linear-gradient(120deg, transparent 40%, rgba(176,124,51,.35) 50%, transparent 60%);
+    background-size: 220% 220%; animation: sheen 5s ease-in-out infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none;
+  }
+  @keyframes sheen { 0% { background-position: 0% 0%; } 100% { background-position: 200% 200%; } }
+
+  #upload-box.drag-active {
+    border-color: #B07C33; background-color: rgba(176,124,51,.07); transform: scale(1.01);
+  }
+  #upload-box.file-ready { border-style: solid; border-color: rgba(176,124,51,.5); }
+  #upload-icon.pop { animation: iconPop .4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes iconPop { 0% { transform: scale(.7) rotate(-6deg); opacity:.4; } 60% { transform: scale(1.12) rotate(2deg); } 100% { transform: scale(1) rotate(0); opacity:1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up, .tilt-card, #upload-box::before, #upload-icon.pop, .btn-shimmer::after { animation:none !important; transition:none !important; opacity:1 !important; transform:none !important; }
+  }
+</style>
 
 <!-- ========================================== -->
 <!-- JAVASCRIPT UPLOAD PDF -->
@@ -280,48 +263,37 @@ function tampilkanFile(input) {
 
         const file = input.files[0];
 
-
         /* Nama file */
         fileName.textContent = file.name;
 
-
         /* Ukuran file */
         const ukuranMB = file.size / (1024 * 1024);
+        fileInfo.textContent = `PDF • ${ukuranMB.toFixed(2)} MB`;
 
-        fileInfo.textContent =
-            `PDF • ${ukuranMB.toFixed(2)} MB`;
-
-
-        /* Ganti icon upload menjadi icon PDF */
+        /* Ganti icon upload menjadi icon PDF, dengan animasi pop */
         uploadIcon.innerHTML = `
             <svg
-                class="w-7 h-7 text-primary"
+                class="w-7 h-7 text-gold-dark"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.75">
-
                 <path d="M14 2H6a2 2 0 00-2 2v16
                          a2 2 0 002 2h12
                          a2 2 0 002-2V8z"/>
-
                 <path d="M14 2v6h6"/>
-
                 <path d="M8 13h2"/>
-
                 <path d="M8 17h6"/>
-
             </svg>
         `;
+        uploadIcon.classList.remove('pop');
+        void uploadIcon.offsetWidth; // restart animation
+        uploadIcon.classList.add('pop');
 
-
-        /* Ubah border */
-        uploadBox.classList.add('border-primary');
-
-        uploadBox.classList.remove('border-border');
-
+        /* Ubah border jadi solid gold */
+        uploadBox.classList.add('file-ready');
+        uploadBox.classList.remove('drag-active');
     }
-
 }
 
 function mulaiLoading(form) {
@@ -332,6 +304,32 @@ function mulaiLoading(form) {
   }
 }
 
+// ---- drag & drop enhancement ----
+(function () {
+  const box = document.getElementById('upload-box');
+  const input = document.getElementById('file-surat');
+  if (!box || !input) return;
+
+  ['dragenter', 'dragover'].forEach(function (evt) {
+    box.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      box.classList.add('drag-active');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (evt) {
+    box.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      box.classList.remove('drag-active');
+    });
+  });
+  box.addEventListener('drop', function (e) {
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files.length > 0) {
+      input.files = files;
+      tampilkanFile(input);
+    }
+  });
+})();
 </script>
 
 {% endblock %}

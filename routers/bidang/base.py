@@ -25,6 +25,42 @@ router = APIRouter(prefix="/b/{bidang_id}")
 VALID_IDS = {"sekretariat", "pemdes", "bidang2", "bidang3", "bidang4"}
 
 
+def _normalize_kategori_arsip(value: object) -> str:
+    text = str(value or "").strip().replace("-", " ")
+    text = re.sub(r"\s+", " ", text)
+    if not text:
+        return "Surat Masuk"
+    normalized = text.upper()
+    aliases = {
+        "SURAT MASUK": "Surat Masuk",
+        "SURAT KELUAR": "Surat Keluar",
+        "MASUK": "Surat Masuk",
+        "KELUAR": "Surat Keluar",
+    }
+    return aliases.get(normalized, text.title())
+
+
+def _normalize_kondisi_arsip(value: object) -> str:
+    text = str(value or "").strip().upper()
+    if not text:
+        return "BAIK"
+    text = re.sub(r"\s+", " ", text)
+    if text in {"BAIK", "RUSAK", "RUSAK RINGAN", "RUSAK BERAT"}:
+        return "RUSAK" if "RUSAK" in text else "BAIK"
+    aliases = {"BAIK": "BAIK", "RUSAK": "RUSAK"}
+    return aliases.get(text, text)
+
+
+def _normalize_rows_for_dashboard(rows: list[dict]) -> list[dict]:
+    out = []
+    for row in rows:
+        item = dict(row)
+        item["kategori_arsip"] = _normalize_kategori_arsip(item.get("kategori_arsip"))
+        item["kondisi_arsip"] = _normalize_kondisi_arsip(item.get("kondisi_arsip"))
+        out.append(item)
+    return out
+
+
 def _hitung_arsip_bulanan(rows: list[dict], tahun: int | None = None) -> list[int]:
     """Hitung arsip per bulan berdasarkan tanggal surat pada tahun berjalan."""
     tahun = tahun or datetime.now().year
@@ -105,6 +141,7 @@ async def dashboard(request: Request, bidang_id: str):
         "message": hasil.get("message", ""),
     }
     rows  = hasil.get("data", []) if hasil.get("status") == "success" else []
+    rows = _normalize_rows_for_dashboard(rows)
     chart_data = _hitung_arsip_bulanan(rows)
     return templates.TemplateResponse(
         "bidang/dashboard.html",
@@ -244,6 +281,13 @@ async def input_simpan(request: Request, bidang_id: str):
             ).strftime("%d/%m/%Y")
         except ValueError:
             pass
+    for field in ("keterangan_jra", "kategori_arsip"):
+        if field in row:
+            row[field] = str(row.get(field, "") or "").strip().upper()
+    if "kondisi_arsip" in row:
+        row["kondisi_arsip"] = _normalize_kondisi_arsip(row.get("kondisi_arsip"))
+    if "kategori_arsip" in row:
+        row["kategori_arsip"] = _normalize_kategori_arsip(row.get("kategori_arsip"))
     row["kode_klas"] = (row.get("kode_kelas") or row.get("kode_klas") or "").strip()
     force = row.pop("force", "false") == "true"
     spreadsheet_id = ctx["bidang"]["spreadsheet_id"]

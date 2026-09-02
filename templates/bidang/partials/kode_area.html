@@ -16,7 +16,6 @@
         data-inaktif="{{ k.retensi_inaktif }}"
         data-ket="{{ k.keterangan }}"
         data-keamanan="{{ k.klasifikasi_keamanan }}"
-        data-akses="{{ k.klasifikasi_akses }}"
         data-unit="{{ k.unit_pengolah }}">
       <div class="text-[13px] min-w-0">
         <span class="mono font-semibold text-ink">{{ k.kode_klasifikasi }}</span>
@@ -49,22 +48,17 @@
       <label>SKKD <span class="ab">PERGUB</span></label>
       <input type="text" name="skkd" id="f_keamanan" list="skkd-options" value="{{ kandidat_kode[0].klasifikasi_keamanan if kandidat_kode else '' }}" class="ai editable-select">
     </div>
-    <div class="fl">
-      <label>Klasifikasi Akses <span class="ab">PERGUB</span></label>
-      <input type="text" name="klasifikasi_akses" id="f_akses" list="akses-options" value="{{ kandidat_kode[0].klasifikasi_akses if kandidat_kode else '' }}" class="ai editable-select">
-    </div>
   </div>
 </div>
 
 <script>
 function isiKode(r) {
-  const ket = r.dataset.ket || '';
+  const ket = (r.dataset.ket || '').toUpperCase();
   document.getElementById('f_kode').value    = r.dataset.kode;
   document.getElementById('f_aktif').value   = r.dataset.aktif;
   document.getElementById('f_inaktif').value = r.dataset.inaktif;
   document.getElementById('f_ket').value     = ket;
   document.getElementById('f_keamanan').value = r.dataset.keamanan;
-  document.getElementById('f_akses').value   = r.dataset.akses;
   document.getElementById('f_unit').value    = r.dataset.unit;
   const hKode = document.querySelector('[name="kode_klas"]');
   if (hKode) hKode.value = r.dataset.kode;

@@ -1,3 +1,5 @@
+<!-- Panduan.html -->
+
 {% extends "bidang/base_bidang.html" %}
 
 {% block title %}Panduan - {{ bidang.nama_pendek }}{% endblock %}
@@ -5,123 +7,163 @@
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-8 py-8">
 
-  <div class="mb-8">
-    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">Bantuan</p>
-    <h1 class="text-[24px] font-extrabold text-ink">Panduan Penggunaan ARDIVA</h1>
-    <p class="text-muted text-[13px] mt-1">Panduan lengkap sistem arsip digital DPMPD Kaltim.</p>
+  <!-- Header banner — same brand language as the rest of the site -->
+  <div class="relative overflow-hidden rounded-2xl mb-8 fade-up" style="background: radial-gradient(120% 140% at 100% 0%, #1E3B6E 0%, #0A1330 55%, #050B1E 100%);">
+    <div class="absolute inset-0 grid-dots-dark opacity-30 pointer-events-none"></div>
+    <svg class="absolute -top-10 -right-10 w-56 h-64 text-gold/10 pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+      <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6" class="ukir-stroke ukir-breathe"/>
+    </svg>
+    <span class="dust" style="left:80%; top:60%; width:2px; height:2px; --dx:12px; animation-duration:10s; animation-delay:.3s;"></span>
+    <div class="relative px-6 sm:px-8 py-7 sm:py-8">
+      <p class="text-gold-light text-[10px] font-semibold tracking-widest uppercase mono mb-1.5">Bantuan</p>
+      <h1 class="font-display text-[24px] font-semibold text-white">Panduan Penggunaan ARDIVA</h1>
+      <p class="text-white/55 text-[13px] mt-1.5">Panduan lengkap sistem arsip digital DPMPD Kaltim.</p>
+    </div>
   </div>
 
   {# ═══════════════════════════════════════════════ #}
   {# SEKSI 2: PENJELASAN KOLOM #}
   {# ═══════════════════════════════════════════════ #}
-  <div class="mb-10">
-    <h2 class="text-[16px] font-bold text-ink mb-5">Penjelasan Kolom</h2>
-    <div class="card overflow-x-auto">
-      <table class="min-w-full text-[13px]">
-        <thead class="bg-surface border-b border-border">
-          <tr>
-            <th class="px-4 py-3 text-left text-[10px] text-muted uppercase font-semibold">Nama Kolom</th>
-            <th class="px-4 py-3 text-left text-[10px] text-muted uppercase font-semibold">Penjelasan</th>
-            <th class="px-4 py-3 text-left text-[10px] text-muted uppercase font-semibold">Contoh Isi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border">
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">No Surat</td>
-            <td class="px-4 py-3 text-muted">Nomor identitas surat sesuai yang tertulis di surat</td>
-            <td class="px-4 py-3 mono text-[12px] text-muted">400.10.2.1/123/DPMPD</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">Uraian Arsip</td>
-            <td class="px-4 py-3 text-muted">Isi singkat surat - biasanya di bagian Hal</td>
-            <td class="px-4 py-3 text-muted">Undangan Rapat Koordinasi</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">Kode Klas</td>
-            <td class="px-4 py-3 text-muted">Kode klasifikasi dari Pergub - terisi otomatis</td>
-            <td class="px-4 py-3 mono text-[12px] text-muted">400.10.2.1</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">Retensi Aktif</td>
-            <td class="px-4 py-3 text-muted">Berapa lama arsip disimpan di tempat aktif</td>
-            <td class="px-4 py-3 text-muted">2 Tahun</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">Retensi Inaktif</td>
-            <td class="px-4 py-3 text-muted">Lama simpan setelah masa aktif selesai</td>
-            <td class="px-4 py-3 text-muted">3 Tahun</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">SKKD</td>
-            <td class="px-4 py-3 text-muted">Status keamanan arsip</td>
-            <td class="px-4 py-3 text-muted">Terbuka / Tertutup</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">Keterangan</td>
-            <td class="px-4 py-3 text-muted">Nasib arsip setelah masa simpan habis</td>
-            <td class="px-4 py-3 text-muted">Musnah / Permanen</td>
-          </tr>
-          <tr>
-            <td class="px-4 py-3 font-semibold text-ink">TK Perkembangan</td>
-            <td class="px-4 py-3 text-muted">Jenis salinan - biasanya COPY</td>
-            <td class="px-4 py-3 text-muted">COPY</td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="mb-10 fade-up d1">
+    <div class="flex items-center gap-2.5 mb-5">
+      <div class="w-7 h-7 rounded-lg bg-gold/15 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
+        </svg>
+      </div>
+      <h2 class="font-display text-[16px] font-bold text-ink">Penjelasan Kolom</h2>
+    </div>
+    <div class="tilt-card relative card overflow-hidden">
+      <div class="tilt-glow"></div>
+      <div class="relative overflow-x-auto">
+        <table class="min-w-full text-[13px]">
+          <thead class="bg-surface border-b border-border">
+            <tr>
+              <th class="px-4 py-3 text-left text-[10px] text-muted uppercase font-semibold mono">Nama Kolom</th>
+              <th class="px-4 py-3 text-left text-[10px] text-muted uppercase font-semibold mono">Penjelasan</th>
+              <th class="px-4 py-3 text-left text-[10px] text-muted uppercase font-semibold mono">Contoh Isi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">No Surat</td>
+              <td class="px-4 py-3 text-muted">Nomor identitas surat sesuai yang tertulis di surat</td>
+              <td class="px-4 py-3 mono text-[12px] text-muted">400.10.2.1/123/DPMPD</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">Uraian Arsip</td>
+              <td class="px-4 py-3 text-muted">Isi singkat surat - biasanya di bagian Hal</td>
+              <td class="px-4 py-3 text-muted">Undangan Rapat Koordinasi</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">Kode Klas</td>
+              <td class="px-4 py-3 text-muted">Kode klasifikasi dari Pergub - terisi otomatis</td>
+              <td class="px-4 py-3 mono text-[12px] text-muted">400.10.2.1</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">Retensi Aktif</td>
+              <td class="px-4 py-3 text-muted">Berapa lama arsip disimpan di tempat aktif</td>
+              <td class="px-4 py-3 text-muted">2 Tahun</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">Retensi Inaktif</td>
+              <td class="px-4 py-3 text-muted">Lama simpan setelah masa aktif selesai</td>
+              <td class="px-4 py-3 text-muted">3 Tahun</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">SKKD</td>
+              <td class="px-4 py-3 text-muted">Status keamanan arsip</td>
+              <td class="px-4 py-3 text-muted">Terbuka / Tertutup</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">Keterangan</td>
+              <td class="px-4 py-3 text-muted">Nasib arsip setelah masa simpan habis</td>
+              <td class="px-4 py-3 text-muted">Musnah / Permanen</td>
+            </tr>
+            <tr class="hover:bg-primary-faint/40 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">TK Perkembangan</td>
+              <td class="px-4 py-3 text-muted">Jenis salinan - biasanya COPY</td>
+              <td class="px-4 py-3 text-muted">COPY</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   {# ═══════════════════════════════════════════════ #}
   {# SEKSI 3: FAQ #}
   {# ═══════════════════════════════════════════════ #}
-  <div class="mb-10">
-    <h2 class="text-[16px] font-bold text-ink mb-5">FAQ</h2>
-    <div class="card divide-y divide-border">
+  <div class="mb-10 fade-up d2">
+    <div class="flex items-center gap-2.5 mb-5">
+      <div class="w-7 h-7 rounded-lg bg-gold/15 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+      </div>
+      <h2 class="font-display text-[16px] font-bold text-ink">Pertanyaan Umum</h2>
+    </div>
+    <div class="relative card divide-y divide-border overflow-hidden">
+      <svg class="absolute -bottom-10 -right-10 w-44 h-48 text-gold/[0.05] pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+        <use href="#ukirMotif" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
 
-      <details class="group p-4">
-        <summary class="flex items-center justify-between cursor-pointer text-[14px] font-semibold text-ink list-none">
-          PDF saya tidak terbaca otomatis, apa yang harus dilakukan?
-          <svg class="w-4 h-4 text-muted group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <details class="group relative p-4 transition-colors hover:bg-primary-faint/30 open:bg-primary-faint/20">
+        <summary class="flex items-center justify-between gap-3 cursor-pointer text-[14px] font-semibold text-ink list-none">
+          <span class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-primary/8 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mono">Q</span>
+            PDF saya tidak terbaca otomatis, apa yang harus dilakukan?
+          </span>
+          <svg class="w-4 h-4 text-muted group-open:rotate-180 group-open:text-gold-dark transition-transform shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 9l-7 7-7-7"/>
           </svg>
         </summary>
-        <p class="text-[13px] text-muted mt-3 leading-relaxed">
+        <p class="text-[13px] text-muted mt-3 leading-relaxed pl-8">
           Isi semua kolom secara manual menggunakan menu Input Manual (tersedia di halaman Input Surat).
         </p>
       </details>
 
-      <details class="group p-4">
-        <summary class="flex items-center justify-between cursor-pointer text-[14px] font-semibold text-ink list-none">
-          Kenapa ada 3 pilihan kode klasifikasi?
-          <svg class="w-4 h-4 text-muted group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <details class="group relative p-4 transition-colors hover:bg-primary-faint/30 open:bg-primary-faint/20">
+        <summary class="flex items-center justify-between gap-3 cursor-pointer text-[14px] font-semibold text-ink list-none">
+          <span class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-primary/8 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mono">Q</span>
+            Kenapa ada 3 pilihan kode klasifikasi?
+          </span>
+          <svg class="w-4 h-4 text-muted group-open:rotate-180 group-open:text-gold-dark transition-transform shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 9l-7 7-7-7"/>
           </svg>
         </summary>
-        <p class="text-[13px] text-muted mt-3 leading-relaxed">
+        <p class="text-[13px] text-muted mt-3 leading-relaxed pl-8">
           Sistem menampilkan beberapa kandidat kode klasifikasi yang paling cocok berdasarkan isi surat. Pilih kode yang paling sesuai dengan perihal surat Anda.
         </p>
       </details>
 
-      <details class="group p-4">
-        <summary class="flex items-center justify-between cursor-pointer text-[14px] font-semibold text-ink list-none">
-          Bagaimana cara mengedit data yang sudah tersimpan?
-          <svg class="w-4 h-4 text-muted group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <details class="group relative p-4 transition-colors hover:bg-primary-faint/30 open:bg-primary-faint/20">
+        <summary class="flex items-center justify-between gap-3 cursor-pointer text-[14px] font-semibold text-ink list-none">
+          <span class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-primary/8 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mono">Q</span>
+            Bagaimana cara mengedit data yang sudah tersimpan?
+          </span>
+          <svg class="w-4 h-4 text-muted group-open:rotate-180 group-open:text-gold-dark transition-transform shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 9l-7 7-7-7"/>
           </svg>
         </summary>
-        <p class="text-[13px] text-muted mt-3 leading-relaxed">
+        <p class="text-[13px] text-muted mt-3 leading-relaxed pl-8">
           Buka menu Lihat Data, cari data yang ingin diubah, lalu klik tombol edit (ikon pensil) pada baris tersebut.
         </p>
       </details>
 
-      <details class="group p-4">
-        <summary class="flex items-center justify-between cursor-pointer text-[14px] font-semibold text-ink list-none">
-          Bagaimana cara menghapus data arsip?
-          <svg class="w-4 h-4 text-muted group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <details class="group relative p-4 transition-colors hover:bg-primary-faint/30 open:bg-primary-faint/20">
+        <summary class="flex items-center justify-between gap-3 cursor-pointer text-[14px] font-semibold text-ink list-none">
+          <span class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-full bg-primary/8 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mono">Q</span>
+            Bagaimana cara menghapus data arsip?
+          </span>
+          <svg class="w-4 h-4 text-muted group-open:rotate-180 group-open:text-gold-dark transition-transform shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 9l-7 7-7-7"/>
           </svg>
         </summary>
-        <p class="text-[13px] text-muted mt-3 leading-relaxed">
+        <p class="text-[13px] text-muted mt-3 leading-relaxed pl-8">
           Buka menu Lihat Data, cari data yang ingin dihapus, klik tombol hapus (ikon tempat sampah), lalu konfirmasi penghapusan.
         </p>
       </details>
@@ -130,4 +172,12 @@
   </div>
 
 </div>
+
+<style>
+  details > summary { -webkit-tap-highlight-color: transparent; }
+  details > summary::-webkit-details-marker { display:none; }
+  @media (prefers-reduced-motion: reduce) {
+    .group svg { transition:none !important; }
+  }
+</style>
 {% endblock %}

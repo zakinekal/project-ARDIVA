@@ -8,74 +8,145 @@
 {% set total_baik = rows | selectattr("kondisi_arsip","eq","BAIK") | list | length %}
 {% set total_rusak = rows | selectattr("kondisi_arsip","eq","RUSAK") | list | length %}
 
-<div class="max-w-4xl mx-auto px-4 sm:px-8 py-8">
+{# Proporsi untuk indikator (aman dari pembagian oleh nol) #}
+{% set total_km = total_keluar + total_masuk %}
+{% set pct_masuk = ((total_masuk / total_km * 100) | round(1)) if total_km > 0 else 50 %}
+{% set pct_keluar = 100 - pct_masuk %}
 
-  <!-- Header -->
-  <div class="mb-6">
-    <p class="text-primary text-[10px] font-semibold tracking-widest uppercase mono mb-1">{{ bidang.nama }}</p>
-    <h1 class="text-[24px] sm:text-[28px] font-extrabold text-ink leading-tight">Selamat datang, {{ user.nama.split()[0] }}</h1>
-    <p class="text-muted text-[13px] mt-1">Sistem Pengarsipan Digital ARDIVA · DPMPD Kalimantan Timur</p>
-  </div>
+{% set total_br = total_baik + total_rusak %}
+{% set pct_baik = ((total_baik / total_br * 100) | round(1)) if total_br > 0 else 50 %}
+{% set pct_rusak = 100 - pct_baik %}
 
-  <!-- Status + CTA -->
-  <div class="card p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-    <div class="flex items-center gap-3 flex-1 min-w-0">
-      <span class="relative flex w-2.5 h-2.5 shrink-0">
-        {% if status.status == "success" %}
-        <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
-        {% endif %}
-        <span class="relative inline-flex rounded-full w-2.5 h-2.5 {% if status.status == 'success' %}bg-emerald-500{% else %}bg-red-500{% endif %}"></span>
-      </span>
-      <div class="min-w-0">
-        <p class="text-[14px] font-semibold text-ink">
-          {% if status.status == "success" %}Terhubung ke Google Sheets{% else %}Google Sheets belum terhubung{% endif %}
-        </p>
-        <p class="text-[12px] text-muted truncate">
-          {% if status.status == "success" %}{{ status.jumlah_data or 0 }} data tersimpan di spreadsheet bidang ini{% else %}{{ status.message }}{% endif %}
-        </p>
+{# Lingkar cincin untuk Total Arsip: keliling = 2 * pi * 50 ≈ 314 #}
+{% set ring_c = 314 %}
+
+<!-- ═══ HERO PANEL ═══ -->
+<div class="relative overflow-hidden px-4 sm:px-8 pt-8 sm:pt-10 pb-16" style="background: radial-gradient(120% 100% at 100% 0%, #1E3B6E 0%, #0A1330 45%, #050B1E 100%);">
+  <div class="absolute inset-0 grid-dots-dark opacity-40 pointer-events-none"></div>
+  <svg class="absolute -top-6 -right-10 w-72 h-80 text-gold/10 pointer-events-none" viewBox="0 0 200 220" fill="none" aria-hidden="true">
+    <use href="#ukirMotif" stroke="currentColor" stroke-width="1.7" class="ukir-stroke ukir-breathe"/>
+  </svg>
+  <span class="dust" style="left:78%; top:60%; width:2.5px; height:2.5px; --dx:16px; animation-duration:10s; animation-delay:.4s; position:absolute;"></span>
+  <span class="dust" style="left:60%; top:75%; width:2px; height:2px; --dx:-12px; animation-duration:12s; animation-delay:2s; position:absolute;"></span>
+  <span class="dust" style="left:88%; top:30%; width:2px; height:2px; --dx:10px; animation-duration:9s; animation-delay:1.2s; position:absolute;"></span>
+
+  <div class="relative max-w-5xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+      <div class="fade-up">
+        <p class="text-gold-light text-[10px] font-semibold tracking-widest uppercase mono mb-2">{{ bidang.nama }}</p>
+        <h1 class="font-display text-[28px] sm:text-[34px] font-semibold text-white leading-tight">Selamat datang, {{ user.nama.split()[0] }}</h1>
+        <p class="text-white/50 text-[13px] mt-1.5">Sistem Pengarsipan Digital ARDIVA · DPMPD Kalimantan Timur</p>
+      </div>
+
+      <!-- status + CTA -->
+      <div class="fade-up d1 flex flex-col sm:items-end gap-3">
+        <div class="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-2">
+          <span class="relative flex w-2 h-2 shrink-0">
+            {% if status.status == "success" %}
+            <span class="absolute inline-flex h-full w-full rounded-full bg-gold opacity-70 animate-ping"></span>
+            {% endif %}
+            <span class="relative inline-flex rounded-full w-2 h-2 {% if status.status == 'success' %}bg-gold{% else %}bg-garnet-light{% endif %}"></span>
+          </span>
+          <span class="text-[12px] text-white/75">
+            {% if status.status == "success" %}Terhubung ke Google Sheets · {{ status.jumlah_data or 0 }} data{% else %}{{ status.message }}{% endif %}
+          </span>
+        </div>
+        <a href="/b/{{ bidang_id }}/input"
+          class="btn-shimmer inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-light text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-black/20">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Input Surat Baru
+        </a>
       </div>
     </div>
-    <a href="/b/{{ bidang_id }}/input"
-      class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-colors shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-      Input Surat Baru
-    </a>
+  </div>
+</div>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-8 -mt-9 pb-10">
+
+  <!-- ═══ STAT DECK ═══ -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+
+    <!-- Card 1: Total Arsip — ring counter -->
+    <div class="tilt-card relative card p-5 fade-up d2 overflow-hidden">
+      <div class="tilt-glow"></div>
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-4 mono">Total Arsip</p>
+      <div class="flex items-center gap-4">
+        <div class="relative w-[72px] h-[72px] shrink-0">
+          <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#E4E0D3" stroke-width="10"/>
+            <circle class="ring-arc" cx="60" cy="60" r="50" fill="none" stroke="#B07C33" stroke-width="10" stroke-linecap="round"
+              stroke-dasharray="{{ ring_c }}" stroke-dashoffset="{{ ring_c }}" data-target="{{ ring_c }}"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+        </div>
+        <div>
+          <p class="font-display text-[36px] font-semibold text-primary leading-none counter-num" data-count="{{ status.jumlah_data or 0 }}">0</p>
+          <p class="text-[12px] text-muted mt-1">entri tersimpan</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Surat Masuk / Keluar — dual channel meter -->
+    <div class="tilt-card relative card p-5 fade-up d3 overflow-hidden">
+      <div class="tilt-glow"></div>
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-4 mono">Surat Masuk / Keluar</p>
+      <div class="space-y-3.5">
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary mono tracking-wide"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>MASUK</span>
+            <span class="font-display text-[17px] font-semibold text-primary leading-none">{{ total_masuk }}</span>
+          </div>
+          <div class="h-2 rounded-full bg-border overflow-hidden">
+            <div class="channel-fill h-full rounded-full" style="background:linear-gradient(90deg,#0A1330,#1E3B6E);" data-target="{{ pct_masuk }}"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-garnet mono tracking-wide"><span class="w-1.5 h-1.5 rounded-full bg-garnet"></span>KELUAR</span>
+            <span class="font-display text-[17px] font-semibold text-garnet leading-none">{{ total_keluar }}</span>
+          </div>
+          <div class="h-2 rounded-full bg-border overflow-hidden">
+            <div class="channel-fill h-full rounded-full" style="background:linear-gradient(90deg,#9C4A2B,#B25A36);" data-target="{{ pct_keluar }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Kondisi Baik / Rusak — dual channel meter -->
+    <div class="tilt-card relative card p-5 fade-up d4 overflow-hidden">
+      <div class="tilt-glow"></div>
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-4 mono">Kondisi Baik / Rusak</p>
+      <div class="space-y-3.5">
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary mono tracking-wide"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>BAIK</span>
+            <span class="font-display text-[17px] font-semibold text-primary leading-none">{{ total_baik }}</span>
+          </div>
+          <div class="h-2 rounded-full bg-border overflow-hidden">
+            <div class="channel-fill h-full rounded-full" style="background:linear-gradient(90deg,#0A1330,#1E3B6E);" data-target="{{ pct_baik }}"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-garnet mono tracking-wide"><span class="w-1.5 h-1.5 rounded-full bg-garnet"></span>RUSAK</span>
+            <span class="font-display text-[17px] font-semibold text-garnet leading-none">{{ total_rusak }}</span>
+          </div>
+          <div class="h-2 rounded-full bg-border overflow-hidden">
+            <div class="channel-fill h-full rounded-full" style="background:linear-gradient(90deg,#9C4A2B,#B25A36);" data-target="{{ pct_rusak }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Cards Statistik -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-
-    <!-- Card 1: Total Arsip -->
-    <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">Total Arsip</p>
-      <p class="text-[36px] font-extrabold text-primary leading-none">{{ status.jumlah_data or 0 }}</p>
-      <p class="text-[12px] text-muted mt-2">entri tersimpan</p>
-    </div>
-
-    <!-- Card 2: Surat Keluar vs Surat Masuk -->
-    <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">Surat Keluar / Masuk</p>
-      <p class="text-[36px] font-extrabold text-primary leading-none">
-        {{ total_keluar }} <span class="text-xl font-normal text-muted">/</span> {{ total_masuk }}
-      </p>
-      <p class="text-[12px] text-muted mt-2">{{ total_keluar }} Keluar · {{ total_masuk }} Masuk</p>
-    </div>
-
-    <!-- Card 3: Kondisi Baik vs Rusak -->
-    <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-2">Kondisi Baik / Rusak</p>
-      <p class="text-[36px] font-extrabold text-primary leading-none">
-        {{ total_baik }} <span class="text-xl font-normal text-muted">/</span> {{ total_rusak }}
-      </p>
-      <p class="text-[12px] text-muted mt-2">{{ total_baik }} Baik · {{ total_rusak }} Rusak</p>
-    </div>
-  </div>
-
-  <!-- Grafik Bar -->
-  <div class="card p-5 mb-6">
+  <!-- ═══ GRAFIK ═══ -->
+  <div class="tilt-card relative card p-5 mb-6 fade-up d5 overflow-hidden">
+    <div class="tilt-glow"></div>
     <div class="flex items-baseline justify-between mb-4">
-      <p class="text-[13px] font-bold text-ink">Tren Arsip per Bulan</p>
-      <p class="text-[11px] text-muted">Tahun berjalan</p>
+      <p class="text-[13px] font-bold text-ink font-display">Tren Arsip per Bulan</p>
+      <p class="text-[11px] text-muted mono">Tahun berjalan</p>
     </div>
     <div class="relative h-[240px]">
       <canvas id="grafikArsip"></canvas>
@@ -86,6 +157,11 @@
   (function () {
     var ctx = document.getElementById("grafikArsip");
     if (!ctx) return;
+    var g2d = ctx.getContext("2d");
+    var gradient = g2d.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, "#B07C33");
+    gradient.addColorStop(1, "#0A1330");
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
     new Chart(ctx, {
       type: "bar",
       data: {
@@ -93,57 +169,59 @@
         datasets: [{
           label: "Jumlah Arsip",
           data: {{ chart_data | tojson }},
-          backgroundColor: "#0D6B52",
+          backgroundColor: gradient,
+          hoverBackgroundColor: "#D2A662",
           borderRadius: 6,
-          maxBarThickness: 28,
+          maxBarThickness: 26,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        animation: { duration: 900, easing: "easeOutQuart" },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#050B1E", titleFont: { family: "'Fraunces', serif", size: 13 },
+            bodyFont: { family: "'IBM Plex Mono', monospace", size: 12 }, padding: 10, cornerRadius: 8,
+            displayColors: false
+          }
+        },
         scales: {
-          y: { beginAtZero: true, grid: { color: "#E4E9F0" } },
-          x: { grid: { display: false } }
+          y: { beginAtZero: true, grid: { color: "rgba(10,19,48,0.06)" }, ticks: { color: "#5B6475", font: { size: 11 } } },
+          x: { grid: { display: false }, ticks: { color: "#5B6475", font: { size: 11 } } }
         }
       }
     });
   })();
   </script>
 
-  <!-- Tabel Arsip Perlu Ditinjau -->
-  <div class="card p-5 mb-6">
+  <!-- ═══ TABEL ═══ -->
+  <div class="card p-5 mb-6 fade-up d5">
     <div class="flex items-baseline justify-between mb-4">
-      <p class="text-[13px] font-bold text-ink">Arsip Perlu Ditinjau</p>
+      <p class="text-[13px] font-bold text-ink font-display">Arsip Perlu Ditinjau</p>
       {% if rows|length > 0 %}
-      <p class="text-[11px] text-muted">Menampilkan {{ rows[:5]|length }} dari {{ rows|length }}</p>
+      <p class="text-[11px] text-muted mono">Menampilkan {{ rows[:5]|length }} dari {{ rows|length }}</p>
       {% endif %}
     </div>
 
     {% if rows|length > 0 %}
-    <div class="overflow-x-auto -mx-5">
-      <table class="min-w-full text-[12px]">
-        <thead class="bg-surface border-y border-border">
-          <tr>
-            <th class="px-5 py-2 text-left text-[10px] font-semibold text-muted uppercase tracking-widest">No Surat</th>
-            <th class="px-5 py-2 text-left text-[10px] font-semibold text-muted uppercase tracking-widest">Uraian</th>
-            <th class="px-5 py-2 text-left text-[10px] font-semibold text-muted uppercase tracking-widest">Retensi Aktif</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border">
-          {% for r in rows[:5] %}
-          <tr class="hover:bg-surface/60 transition-colors">
-            <td class="px-5 py-2.5 mono text-ink">{{ r.no_surat }}</td>
-            <td class="px-5 py-2.5 text-ink">{{ r.uraian_arsip[:40] }}{% if r.uraian_arsip|length > 40 %}…{% endif %}</td>
-            <td class="px-5 py-2.5 text-muted">{{ r.retensi_aktif }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="space-y-2">
+      {% for r in rows[:5] %}
+      <div class="kk-row relative flex items-center gap-4 rounded-xl border pl-4 pr-4 py-3 {{ 'border-l-4 border-l-primary' if r.kategori_arsip == 'Surat Masuk' else 'border-l-4 border-l-garnet' }}" style="border-top-color:#E4E0D3; border-right-color:#E4E0D3; border-bottom-color:#E4E0D3;">
+        <span class="mono text-[10px] text-gold-dark font-bold shrink-0 w-9">{{ '%02d'|format(loop.index) }}</span>
+        <div class="min-w-0 flex-1 grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-x-4 gap-y-1 items-center">
+          <span class="mono text-[12px] text-primary font-medium shrink-0">{{ r.no_surat }}</span>
+          <span class="text-[13px] text-ink truncate">{{ r.uraian_arsip[:48] }}{% if r.uraian_arsip|length > 48 %}…{% endif %}</span>
+          <span class="text-[11px] text-muted mono shrink-0 justify-self-start sm:justify-self-end">Retensi {{ r.retensi_aktif }}</span>
+        </div>
+        <span class="shrink-0 {{ 'b-ok' if r.kategori_arsip == 'Surat Masuk' else 'b-bad' }}">{{ r.kategori_arsip }}</span>
+      </div>
+      {% endfor %}
     </div>
     {% else %}
     <div class="flex flex-col items-center justify-center text-center py-10">
-      <svg class="w-9 h-9 text-muted/40 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <svg class="w-9 h-9 text-primary/15 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M4 7h16M4 12h16M4 17h10"/>
       </svg>
       <p class="text-[13px] font-semibold text-ink">Belum ada arsip yang perlu ditinjau</p>
@@ -152,29 +230,29 @@
     {% endif %}
   </div>
 
-  <!-- Info cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Alur Kerja</p>
-      <ol class="space-y-2 text-[13px] text-ink">
+  <!-- ═══ INFO CARDS ═══ -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+    <div class="card p-5 fade-up d5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3 mono">Alur Kerja</p>
+      <ol class="space-y-2.5 text-[13px] text-ink">
         <li class="flex items-start gap-2.5">
-          <span class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
-          Upload PDF surat
+          <span class="seal-badge" style="animation-delay:.05s">1</span>
+          <span class="pt-0.5">Upload PDF surat</span>
         </li>
         <li class="flex items-start gap-2.5">
-          <span class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
-          AI baca data otomatis
+          <span class="seal-badge" style="animation-delay:.15s">2</span>
+          <span class="pt-0.5">AI baca data otomatis</span>
         </li>
         <li class="flex items-start gap-2.5">
-          <span class="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
-          Verifikasi dan simpan
+          <span class="seal-badge" style="animation-delay:.25s">3</span>
+          <span class="pt-0.5">Verifikasi dan simpan</span>
         </li>
       </ol>
     </div>
 
-    <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Otomatis Terisi</p>
-      <ul class="space-y-1.5 text-[13px] text-ink">
+    <div class="card p-5 fade-up d5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3 mono">Otomatis Terisi</p>
+      <ul class="space-y-2 text-[13px] text-ink">
         {% for item in ["Nomor & tanggal surat","Pengirim surat","Kode klasifikasi","Retensi JRA & SKKD"] %}
         <li class="flex items-center gap-2">
           <svg class="w-3.5 h-3.5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
@@ -184,16 +262,95 @@
       </ul>
     </div>
 
-    <div class="card p-5">
-      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Dasar Hukum</p>
+    <div class="card p-5 fade-up d5">
+      <p class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3 mono">Dasar Hukum</p>
       <p class="text-[13px] text-ink leading-relaxed">Peraturan Gubernur Kalimantan Timur <span class="font-semibold">No. 9 Tahun 2024</span> tentang Instrumen Pengelolaan Arsip Dinamis.</p>
       <p class="text-[12px] text-muted mt-2">Database mencakup <span class="font-semibold text-ink">3.151 kode klas</span> beserta JRA dan SKKD.</p>
     </div>
   </div>
+</div>
 
-  <div class="flex justify-end">
-    <a href="/b/{{ bidang_id }}/data" class="inline-flex items-center gap-1 text-[13px] text-primary font-medium hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded">
-      Lihat semua data arsip →
-    </a>
-  </div>
-</div>{% endblock %}
+<style>
+  .btn-shimmer { position:relative; overflow:hidden; }
+  .btn-shimmer::after {
+    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-18deg); transition: left .7s ease;
+  }
+  .btn-shimmer:hover::after { left:130%; }
+
+  .ring-arc { transition: stroke-dashoffset 1.1s cubic-bezier(.22,.7,.2,1); }
+
+  /* dual channel meter fill — grows in once on scroll reveal, not a looping "loading" animation */
+  .channel-fill { width:0%; transition: width 1s cubic-bezier(.22,.7,.2,1); }
+
+  /* ledger row (Arsip Perlu Ditinjau) — echoes the kartu-kendali language from the public site */
+  .kk-row { background:white; transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease, border-color .3s ease; }
+  .kk-row:hover { transform: translateX(6px); box-shadow: -4px 8px 20px -10px rgba(10,19,48,.2); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up, .btn-shimmer::after, .ring-arc, .tilt-card, .channel-fill, .kk-row, .seal-badge { animation:none !important; transition:none !important; opacity:1 !important; transform:none !important; }
+  }
+</style>
+
+<script>
+(function () {
+  // animated ring arc (Total Arsip)
+  var rings = document.querySelectorAll('.ring-arc');
+  var ringObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var dasharray = parseFloat(el.getAttribute('stroke-dasharray'));
+      var target = parseFloat(el.dataset.target);
+      el.style.strokeDashoffset = (dasharray - target);
+      ringObserver.unobserve(el);
+    });
+  }, { threshold: 0.4 });
+  rings.forEach(function (r) { ringObserver.observe(r); });
+
+  // dual channel meters (Masuk/Keluar, Baik/Rusak)
+  var channels = document.querySelectorAll('.channel-fill');
+  var channelObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      el.style.width = (el.dataset.target || 0) + '%';
+      channelObserver.unobserve(el);
+    });
+  }, { threshold: 0.4 });
+  channels.forEach(function (c) { channelObserver.observe(c); });
+
+  // animated counters
+  var counters = document.querySelectorAll('.counter-num');
+  var counterObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var target = parseInt(el.dataset.count, 10) || 0;
+      var duration = 1000;
+      var start = performance.now();
+      function tick(now) {
+        var p = Math.min((now - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(eased * target).toLocaleString('id-ID');
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      counterObserver.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  counters.forEach(function (c) { counterObserver.observe(c); });
+
+  // tilt-card cursor glow
+  document.querySelectorAll('.tilt-card').forEach(function (card) {
+    card.addEventListener('mousemove', function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+})();
+</script>
+
+{% endblock %}

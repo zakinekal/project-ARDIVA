@@ -48,6 +48,23 @@ class KlasifikasiMatcher:
         match = re.search(r"(\d+)\s*tahun", str(value or ""), re.IGNORECASE)
         return f"{match.group(1)} TAHUN" if match else ""
 
+    @staticmethod
+    def _normalize_text_upper(value):
+        return str(value or "").strip().upper()
+
+    @staticmethod
+    def _normalize_skkd_keamanan(value):
+        v = str(value or "").strip().upper()
+        mapping = {
+            "BIAASA": "TERBUKA",
+            "BIASA": "TERBUKA",
+            "TERBUKA": "TERBUKA",
+            "TERBATAS": "TERTUTUP",
+            "TERTUTUP": "TERTUTUP",
+            "TERBATASI": "TERTUTUP",
+        }
+        return mapping.get(v, v if v else "")
+
     def classify_sub_kegiatan(self, text, top_n=3):
         """
         Tebak Sub Kegiatan (dari 10 pilihan tetap) berdasarkan kecocokan kata kunci.
@@ -102,9 +119,8 @@ class KlasifikasiMatcher:
             "jenis_series_arsip": self.docs_original.get(kode, ""),
             "retensi_aktif": self._retensi_tahun(j["retensi_aktif"] if j else ""),
             "retensi_inaktif": self._retensi_tahun(j["retensi_inaktif"] if j else ""),
-            "keterangan": j["keterangan"] if j else "",
-            "klasifikasi_keamanan": s["klasifikasi_keamanan"] if s else "",
-            "klasifikasi_akses": s["klasifikasi_akses"] if s else "",
+            "keterangan": self._normalize_text_upper(j["keterangan"] if j else ""),
+            "klasifikasi_keamanan": self._normalize_skkd_keamanan(s["klasifikasi_keamanan"] if s else ""),
             "hak_akses": s["hak_akses"] if s else "",
             "unit_pengolah": s["unit_pengolah"] if s else "",
         }
@@ -152,5 +168,5 @@ if __name__ == "__main__":
         for kand in m.cari_kandidat(uraian, sub_kegiatan=sub, top_n=3):
             print(f"   [{kand['skor']}] ({kand['sumber']}) {kand['kode_klasifikasi']} - {kand['jenis_series_arsip'][:60]}")
             print(f"        Retensi: aktif={kand['retensi_aktif']}, inaktif={kand['retensi_inaktif']}, ket={kand['keterangan']}")
-            print(f"        SKKD: {kand['klasifikasi_keamanan']} / {kand['klasifikasi_akses']}")
+            print(f"        SKKD: {kand['klasifikasi_keamanan']}")
         print()
